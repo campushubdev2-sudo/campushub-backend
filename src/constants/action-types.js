@@ -35,6 +35,24 @@ const ACTION_TYPES = [
   "event.update",
   "event.delete",
 
+  // EVENT NOTIFICATIONS
+  "notification.create",
+  "notification.bulk-create",
+  "notification.list",
+  "notification.detail",
+  "notification.update",
+  "notification.delete",
+  "notification.stats",
+  "notification.stats.overall",
+
+  // REPORTS
+  "report.create",
+  "report.list",
+  "report.detail",
+  "report.download(s)",
+  "report.update-status",
+  "report.delete",
+
   // OTP
   "otp.cleanup",
   "otp.stats",
@@ -56,19 +74,22 @@ const ACTION_TYPES = [
   // CALENDAR ENTRIES
   "calendar-entry.create",
   "calendar-entry.list",
-  "calendar-entry.detail",
-  "calendar-entry.by-event",
-  "calendar-entry.by-user",
-  "calendar-entry.check.event-added",
   "calendar-entry.update",
   "calendar-entry.delete",
   "calendar-entry.stats.overview",
+  "calendar-entry.detail",
 
-  // ROLES / PERMISSIONS (from audit log usage)
-  "user.login",
-  "user.logout",
-  "role.grant",
-  "role.revoke",
+  // OFFICERS
+  "officer.create",
+  "officer.list",
+  "officer.detail",
+  "officer.update",
+  "officer.delete",
+  "officer.stats.overview",
+  "officer.stats.detailed",
+  "officer.stats.organization",
+  "officer.stats.period",
+  "officer.near-term-end",
 ];
 
 export { ACTION_TYPES };

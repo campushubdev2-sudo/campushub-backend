@@ -3,7 +3,10 @@ import schoolEventService from "../services/school-event.service.js";
 
 class SchoolEventController {
   createNewEvent = asyncHandler(async (req, res) => {
-    const newEvent = await schoolEventService.createSchoolEvent(req.body);
+    const newEvent = await schoolEventService.createSchoolEvent(
+      req.user.id,
+      req.body,
+    );
 
     res.status(201).json({
       success: true,
@@ -13,7 +16,10 @@ class SchoolEventController {
   });
 
   getAllEvents = asyncHandler(async (req, res) => {
-    const result = await schoolEventService.getAllEvents(req.query);
+    const result = await schoolEventService.getAllEvents(
+      req.user.id,
+      req.query,
+    );
 
     res.status(200).json({
       success: true,
@@ -29,7 +35,10 @@ class SchoolEventController {
   });
 
   getSchoolEventById = asyncHandler(async (req, res) => {
-    const result = await schoolEventService.getSchoolEventById(req.params);
+    const result = await schoolEventService.getSchoolEventById(
+      req.user.id,
+      req.params,
+    );
 
     res.status(200).json({
       success: true,
@@ -39,7 +48,10 @@ class SchoolEventController {
   });
 
   filterEvents = asyncHandler(async (req, res) => {
-    const result = await schoolEventService.filterEventsByDate(req.query);
+    const result = await schoolEventService.filterEventsByDate(
+      req.user.id,
+      req.query,
+    );
 
     res.status(200).json({
       success: true,
@@ -50,7 +62,7 @@ class SchoolEventController {
   });
 
   getStats = asyncHandler(async (req, res) => {
-    const stats = await schoolEventService.getEventStats();
+    const stats = await schoolEventService.getEventStats(req.user.id);
 
     res.status(200).json({
       success: true,
@@ -62,7 +74,9 @@ class SchoolEventController {
   getMonthlyStats = asyncHandler(async (req, res) => {
     const { year } = req.query;
 
-    const result = await schoolEventService.getMonthlyEventCount({ year });
+    const result = await schoolEventService.getMonthlyEventCount(req.user.id, {
+      year,
+    });
 
     res.status(200).json({
       success: true,
@@ -72,7 +86,7 @@ class SchoolEventController {
   });
 
   getVenueStats = asyncHandler(async (req, res) => {
-    const venueStats = await schoolEventService.getVenueStats();
+    const venueStats = await schoolEventService.getVenueStats(req.user.id);
 
     res.status(200).json({
       success: true,
@@ -85,7 +99,9 @@ class SchoolEventController {
   getRecentEvents = asyncHandler(async (req, res) => {
     const { limit } = req.query;
 
-    const result = await schoolEventService.getRecentEvents({ limit });
+    const result = await schoolEventService.getRecentEvents(req.user.id, {
+      limit,
+    });
 
     res.status(200).json({
       success: true,
@@ -99,7 +115,11 @@ class SchoolEventController {
     const { id } = req.params;
     const updateData = req.body;
 
-    const result = await schoolEventService.updateEvent(id, updateData);
+    const result = await schoolEventService.updateEvent(
+      req.user.id,
+      id,
+      updateData,
+    );
 
     res.status(200).json({
       success: true,
@@ -110,7 +130,7 @@ class SchoolEventController {
 
   deleteSchoolEvent = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const result = await schoolEventService.deleteSchoolEvent(id);
+    const result = await schoolEventService.deleteSchoolEvent(req.user.id, id);
 
     res.status(200).json({
       success: true,

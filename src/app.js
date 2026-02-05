@@ -17,10 +17,14 @@ import officerRoutes from "./routes/officer.route.js";
 import calendarEntryRoutes from "./routes/calendar-entry.route.js";
 import eventNotificationRoutes from "./routes/event-notification.route.js";
 import reportsRoutes from "./routes/report.route.js";
+import { NODE_ENV } from "./config/env.js";
 
 const app = express();
 
-app.use(cors({ origin: "http://localhost:5173" }));
+if (NODE_ENV === "development") {
+  app.use(cors({ origin: "http://localhost:5173" }));
+}
+
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 

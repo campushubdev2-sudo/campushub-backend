@@ -1,19 +1,18 @@
 import eventNotificationRepository from "../repositories/event-notification.repository.js";
-import {
-  createEventNotificationSchema,
-  createBulkEventNotificationSchema,
-  getEventNotificationByIdSchema,
-  getEventNotificationsSchema,
-  updateEventNotificationSchema,
-  eventNotificationIdSchema,
-} from "../validations/event-notification.validation.js";
+import { createEventNotificationSchema } from "../validations/event-notification.validation.js";
+import { createBulkEventNotificationSchema } from "../validations/event-notification.validation.js";
+import { getEventNotificationByIdSchema } from "../validations/event-notification.validation.js";
+import { getEventNotificationsSchema } from "../validations/event-notification.validation.js";
+import { updateEventNotificationSchema } from "../validations/event-notification.validation.js";
+import { eventNotificationIdSchema } from "../validations/event-notification.validation.js";
 import { AppError } from "../middlewares/error.middleware.js";
 import schoolEventRepository from "../repositories/school-event.repository.js";
 import userRepository from "../repositories/user.repository.js";
 import smsService from "./sms.service.js";
+import auditLogRepository from "../repositories/audit-log.repository.js";
 
 class EventNotificationService {
-  async createEventNotification(payload) {
+  async createEventNotification(actorId, payload) {
     const { error, value } = createEventNotificationSchema.validate(payload);
     if (error) {
       const messages = error.details.map((detail) => detail.message);
@@ -43,14 +42,10 @@ class EventNotificationService {
     });
 
     try {
-      const response = await smsService.sendSMS({
+      await smsService.sendSMS({
         to: recipient.phoneNumber,
         message,
       });
-
-      console.log("response: ", response);
-
-      console.log(`SMS would be sent to ${recipient.phoneNumber}: ${message}`);
 
       await eventNotificationRepository.updateStatus(notification._id, "sent");
     } catch (smsError) {
@@ -61,6 +56,11 @@ class EventNotificationService {
         "failed",
       );
     }
+
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "notification.create",
+    });
 
     return {
       id: notification._id,
@@ -74,7 +74,7 @@ class EventNotificationService {
     };
   }
 
-  async createBulkEventNotifications(payload) {
+  async createBulkEventNotifications(actorId, payload) {
     const { error, value } =
       createBulkEventNotificationSchema.validate(payload);
     if (error) {
@@ -132,8 +132,6 @@ class EventNotificationService {
     const createdNotifications =
       await eventNotificationRepository.createMany(newNotificationsData);
 
-    // [SMS SENDING PLACEHOLDER - START]
-    // After notifications are created, send SMS to recipients
     try {
       // Filter users who should receive SMS (those in newNotificationsData)
       const newRecipientUsers = users.filter((user) =>
@@ -150,11 +148,10 @@ class EventNotificationService {
             to: user.phoneNumber,
             message,
           });
-          console.log(`SMS would be sent to ${user.phoneNumber}: ${message}`);
         }
       }
 
-      // Optional: Update notification status or log SMS delivery
+      // Update notification status or log SMS delivery
       await eventNotificationRepository.updateManyStatus(
         createdNotifications.map((n) => n._id),
         "sent",
@@ -163,7 +160,6 @@ class EventNotificationService {
       // Log error but don't fail the request
       console.error("Failed to send SMS notifications:", error);
     }
-    // [SMS SENDING PLACEHOLDER - END]
 
     const sanitizedNotifications = createdNotifications.map((notification) => ({
       id: notification._id,
@@ -176,6 +172,11 @@ class EventNotificationService {
       updatedAt: notification.updatedAt,
     }));
 
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "notification.bulk-create",
+    });
+
     return {
       totalRecipients: uniqueRecipientIds.length,
       skippedDuplicates: notificationsData.length - newNotificationsData.length,
@@ -184,7 +185,7 @@ class EventNotificationService {
     };
   }
 
-  async getAllEventNotifications(queryParams) {
+  async getAllEventNotifications(actorId, queryParams) {
     // Validate query parameters
     const { error, value } = getEventNotificationsSchema.validate(queryParams);
 
@@ -232,11 +233,16 @@ class EventNotificationService {
       page,
     });
 
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "notification.list",
+    });
+
     // Return sanitized data
     return result;
   }
 
-  async getEventNotificationById(notificationId) {
+  async getEventNotificationById(actorId, notificationId) {
     // Validate notification ID
     const { error, value } = getEventNotificationByIdSchema.validate({
       id: notificationId,
@@ -257,11 +263,16 @@ class EventNotificationService {
       throw new AppError("Event notification not found", 404);
     }
 
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "notification.detail",
+    });
+
     // Return sanitized data
     return notification;
   }
 
-  async updateEventNotification(payload) {
+  async updateEventNotification(actorId, payload) {
     const { error: idError, value: idValue } =
       eventNotificationIdSchema.validate({
         id: payload.id,
@@ -315,10 +326,15 @@ class EventNotificationService {
         updatedNotification._id,
       );
 
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "notification.update",
+    });
+
     return populatedNotification;
   }
 
-  async deleteEventNotification(payload) {
+  async deleteEventNotification(actorId, payload) {
     const { error, value } = eventNotificationIdSchema.validate(payload);
 
     if (error) {
@@ -345,14 +361,29 @@ class EventNotificationService {
       sentAt: deletedNotification.sentAt,
     };
 
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "notification.delete",
+    });
+
     return notificationData;
   }
 
-  async getOverallStats() {
+  async getOverallStats(actorId) {
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "notification.stats.overall",
+    });
+
     return await eventNotificationRepository.getOverallStats();
   }
 
-  async getEventStats(eventId) {
+  async getEventStats(actorId, eventId) {
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "notification.stats",
+    });
+
     return await eventNotificationRepository.getEventStats(eventId);
   }
 }

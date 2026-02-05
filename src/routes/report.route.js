@@ -2,11 +2,9 @@
 import { Router } from "express";
 import ReportController from "../controllers/report.controller.js";
 import { authenticate, authorize } from "../middlewares/auth.middleware.js";
-import {
-  uploadReportFiles,
-  handleMulterError,
-  parseFormData,
-} from "../middlewares/upload.middleware.js";
+import { uploadReportFiles } from "../middlewares/upload.middleware.js";
+import { handleMulterError } from "../middlewares/upload.middleware.js";
+import { parseFormData } from "../middlewares/upload.middleware.js";
 
 const reportRouter = Router();
 
@@ -52,7 +50,7 @@ reportRouter.delete(
   "/:id",
   authenticate,
   authorize("admin"),
-  ReportController.deleteReport,
+  ReportController.deleteReportById,
 );
 
 export default reportRouter;

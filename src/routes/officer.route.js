@@ -80,7 +80,6 @@ officerRouter.delete(
   "/:id",
   authenticate,
   authorize("admin"),
-
   officerController.deleteOfficer,
 );
 

@@ -13,6 +13,22 @@ eventNotificationRouter.use(
   }),
 );
 
+// overall stats
+eventNotificationRouter.get(
+  "/stats/overall",
+  authenticate,
+  authorize("admin"),
+  eventNotificationController.getOverallStats,
+);
+
+// per-event stats
+eventNotificationRouter.get(
+  "/stats/event/:id",
+  authenticate,
+  authorize("admin"),
+  eventNotificationController.getEventStats,
+);
+
 eventNotificationRouter.post(
   "/",
   authenticate,

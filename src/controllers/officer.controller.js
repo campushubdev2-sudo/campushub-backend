@@ -3,7 +3,7 @@ import officerService from "../services/officer.service.js";
 
 class OfficerController {
   createOfficer = asyncHandler(async (req, res) => {
-    const officer = await officerService.createOfficer(req.body);
+    const officer = await officerService.createOfficer(req.user.id, req.body);
 
     res.status(201).json({
       success: true,
@@ -13,7 +13,7 @@ class OfficerController {
   });
 
   getOfficers = asyncHandler(async (req, res) => {
-    const result = await officerService.getOfficers(req.query);
+    const result = await officerService.getOfficers(req.user.id, req.query);
 
     res.status(200).json({
       success: true,
@@ -23,7 +23,10 @@ class OfficerController {
   });
 
   getOfficerById = asyncHandler(async (req, res) => {
-    const officer = await officerService.getOfficerById(req.params);
+    const officer = await officerService.getOfficerById(
+      req.user.id,
+      req.params,
+    );
 
     res.status(200).json({
       success: true,
@@ -34,7 +37,11 @@ class OfficerController {
 
   updateOfficer = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const result = await officerService.updateOfficer(id, req.body);
+    const result = await officerService.updateOfficer(
+      req.user.id,
+      id,
+      req.body,
+    );
 
     res.status(200).json({
       success: true,
@@ -44,7 +51,10 @@ class OfficerController {
   });
 
   deleteOfficer = asyncHandler(async (req, res) => {
-    const result = await officerService.deleteOfficerById(req.params);
+    const result = await officerService.deleteOfficerById(
+      req.user.id,
+      req.params,
+    );
 
     res.status(200).json({
       success: true,
@@ -54,7 +64,7 @@ class OfficerController {
   });
 
   getOfficerStats = asyncHandler(async (req, res) => {
-    const result = await officerService.getOfficerStats();
+    const result = await officerService.getOfficerStats(req.user.id);
 
     res.status(200).json({
       success: true,
@@ -64,7 +74,10 @@ class OfficerController {
   });
 
   getOfficersByPeriod = asyncHandler(async (req, res) => {
-    const result = await officerService.getOfficersByPeriod(req.query);
+    const result = await officerService.getOfficersByPeriod(
+      req.user.id,
+      req.query,
+    );
 
     res.status(200).json({
       success: true,
@@ -74,7 +87,7 @@ class OfficerController {
   });
 
   getOfficersDetailed = asyncHandler(async (req, res) => {
-    const result = await officerService.getOfficersDetailed();
+    const result = await officerService.getOfficersDetailed(req.user.id);
 
     res.status(200).json({
       success: true,
@@ -85,7 +98,10 @@ class OfficerController {
   });
 
   getOfficersNearTermEnd = asyncHandler(async (req, res) => {
-    const result = await officerService.getOfficersNearTermEnd(req.query);
+    const result = await officerService.getOfficersNearTermEnd(
+      req.user.id,
+      req.query,
+    );
 
     res.status(200).json({
       success: true,
@@ -96,6 +112,7 @@ class OfficerController {
 
   getOrganizationOfficerStats = asyncHandler(async (req, res) => {
     const result = await officerService.getOrganizationOfficerStats(
+      req.user.id,
       req.params.orgId,
     );
 

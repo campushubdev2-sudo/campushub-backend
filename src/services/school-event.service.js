@@ -1,22 +1,20 @@
 // src/services/school-event.service.js
-import {
-  createSchoolEventSchema,
-  getAllSchoolEventsSchema,
-  getSchoolEventByIdSchema,
-  filterEventsSchema,
-  getMonthlyStatsSchema,
-  getRecentEventsSchema,
-  updateEventSchema,
-  deleteSchoolEventSchema,
-  filteredUpdateSchema,
-} from "../validations/school-event.validation.js";
+import { createSchoolEventSchema } from "../validations/school-event.validation.js";
+import { getAllSchoolEventsSchema } from "../validations/school-event.validation.js";
+import { getSchoolEventByIdSchema } from "../validations/school-event.validation.js";
+import { filterEventsSchema } from "../validations/school-event.validation.js";
+import { getMonthlyStatsSchema } from "../validations/school-event.validation.js";
+import { getRecentEventsSchema } from "../validations/school-event.validation.js";
+import { updateEventSchema } from "../validations/school-event.validation.js";
+import { deleteSchoolEventSchema } from "../validations/school-event.validation.js";
+import { filteredUpdateSchema } from "../validations/school-event.validation.js";
 import SchoolEventRepository from "../repositories/school-event.repository.js";
 import { AppError } from "../middlewares/error.middleware.js";
 import { buildFilterFromQuery } from "../utils/buildFilter.js";
 import auditLogRepository from "../repositories/audit-log.repository.js";
 
 class SchoolEventService {
-  async createSchoolEvent(payload) {
+  async createSchoolEvent(actorId, payload) {
     const { error, value } = createSchoolEventSchema.validate(payload);
     if (error) {
       const message = error.details.map((detail) => detail.message).join(", ");
@@ -37,16 +35,15 @@ class SchoolEventService {
       organizedBy,
     });
 
-
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "event.create",
     });
 
     return event;
   }
 
-  async getAllEvents(payload) {
+  async getAllEvents(actorId, payload) {
     const { error, value } = getAllSchoolEventsSchema.validate(payload);
 
     if (error) {
@@ -60,14 +57,14 @@ class SchoolEventService {
     });
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "event.list",
     });
 
     return result;
   }
 
-  async getSchoolEventById(payload) {
+  async getSchoolEventById(actorId, payload) {
     const { error, value } = getSchoolEventByIdSchema.validate(payload);
 
     if (error) {
@@ -84,14 +81,14 @@ class SchoolEventService {
     }
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "event.detail",
     });
 
     return event;
   }
 
-  async filterEventsByDate(payload) {
+  async filterEventsByDate(actorId, payload) {
     const { error, value } = filterEventsSchema.validate(payload);
 
     if (error) {
@@ -112,25 +109,25 @@ class SchoolEventService {
     );
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "event.filter.date-range",
     });
 
     return events;
   }
 
-  async getEventStats() {
+  async getEventStats(actorId) {
     const stats = await SchoolEventRepository.getEventStats();
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "event.stats.overview",
     });
 
     return stats;
   }
 
-  async getMonthlyEventCount(payload) {
+  async getMonthlyEventCount(actorId, payload) {
     const { error, value } = getMonthlyStatsSchema.validate(payload);
 
     if (error) {
@@ -155,7 +152,7 @@ class SchoolEventService {
     });
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "event.stats.monthly",
     });
 
@@ -165,18 +162,18 @@ class SchoolEventService {
     };
   }
 
-  async getVenueStats() {
+  async getVenueStats(actorId) {
     const venueStats = await SchoolEventRepository.getVenueStats();
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "event.stats.venues",
     });
 
     return venueStats;
   }
 
-  async getRecentEvents(payload) {
+  async getRecentEvents(actorId, payload) {
     const { error, value } = getRecentEventsSchema.validate(payload);
 
     if (error) {
@@ -188,14 +185,14 @@ class SchoolEventService {
     const recentEvents = await SchoolEventRepository.getRecentEvents(limit);
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "event.recent",
     });
 
     return recentEvents;
   }
 
-  async updateEvent(id, payload, options = {}) {
+  async updateEvent(actorId, id, payload, options = {}) {
     const { restrictFields = true, allowPastDates = false } = options;
     console.log("restrictFields: ", restrictFields);
     console.log("allowPastDates: ", allowPastDates);
@@ -253,14 +250,14 @@ class SchoolEventService {
     const updatedEvent = await SchoolEventRepository.updateById(id, value);
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "event.update",
     });
 
     return updatedEvent;
   }
 
-  async deleteSchoolEvent(id) {
+  async deleteSchoolEvent(actorId, id) {
     const { error, value } = deleteSchoolEventSchema.validate({ id });
     if (error) {
       const messages = error.details.map((detail) => detail.message);
@@ -277,7 +274,7 @@ class SchoolEventService {
     const deletedEvent = await SchoolEventRepository.deleteById(eventId);
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "event.delete",
     });
 

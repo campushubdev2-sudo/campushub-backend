@@ -16,7 +16,7 @@ class OtpService {
     this.MAX_VERIFICATION_ATTEMPTS = 5;
   }
 
-  async sendOtp(payload) {
+  async sendOtp(actorId, payload) {
     const { error, value } = sendOtpSchema.validate(payload);
     if (error) {
       const message = error.details.map((detail) => detail.message).join(", ");
@@ -47,7 +47,7 @@ class OtpService {
     await emailService.sendOTPEmail(email, otp);
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "otp.send",
     });
 
@@ -57,7 +57,7 @@ class OtpService {
     };
   }
 
-  async resend(payload) {
+  async resend(actorId, payload) {
     const { error, value } = sendOtpSchema.validate(payload);
     if (error) {
       const message = error.details.map((detail) => detail.message).join(", ");
@@ -79,14 +79,14 @@ class OtpService {
     }
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "otp.resend",
     });
 
     return await this.sendOtp({ email });
   }
 
-  async verifyOtp(payload) {
+  async verifyOtp(actorId, payload) {
     const { error, value } = verifyOtpSchema.validate(payload);
     if (error) {
       const message = error.details.map((detail) => detail.message).join(", ");
@@ -135,7 +135,7 @@ class OtpService {
     await otpRepository.deleteOtpsByEmail(email);
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "otp.verify",
     });
 
@@ -149,8 +149,13 @@ class OtpService {
     return crypto.randomInt(100000, 999999).toString();
   }
 
-  async cleanupExpiredOtps() {
+  async cleanupExpiredOtps(actorId) {
     const result = await otpRepository.deleteExpiredOtps();
+
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "otp.cleanup",
+    });
 
     return {
       message: "Expired OTPs have been successfully deleted",
@@ -160,10 +165,9 @@ class OtpService {
     };
   }
 
-  async getOtpStatistics() {
-
+  async getOtpStatistics(actorId) {
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "otp.stats",
     });
 

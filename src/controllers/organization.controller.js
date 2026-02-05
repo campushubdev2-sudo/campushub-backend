@@ -3,8 +3,11 @@ import organizationService from "../services/organization.service.js";
 
 class OrganizationController {
   createOrganization = asyncHandler(async (req, res) => {
-    const result = await organizationService.createOrganization(req.body);
-    
+    const result = await organizationService.createOrganization(
+      req.user.id,
+      req.body,
+    );
+
     res.status(201).json({
       success: true,
       message: "Organization created successfully",
@@ -13,7 +16,10 @@ class OrganizationController {
   });
 
   getOrganizations = asyncHandler(async (req, res) => {
-    const result = await organizationService.getAllOrganizations(req.query);
+    const result = await organizationService.getAllOrganizations(
+      req.user.id,
+      req.query,
+    );
 
     res.status(200).json({
       success: true,
@@ -24,7 +30,10 @@ class OrganizationController {
   });
 
   getOrganization = asyncHandler(async (req, res) => {
-    const result = await organizationService.getOrganization(req.params.id);
+    const result = await organizationService.getOrganization(
+      req.user.id,
+      req.params.id,
+    );
 
     res.status(200).json({
       success: true,
@@ -35,6 +44,7 @@ class OrganizationController {
 
   updateOrganization = asyncHandler(async (req, res) => {
     const result = await organizationService.updateOrganization(
+      req.user.id,
       req.params.id,
       req.body,
     );
@@ -47,7 +57,7 @@ class OrganizationController {
   });
 
   deleteOrganization = asyncHandler(async (req, res) => {
-    await organizationService.deleteOrganization(req.params.id);
+    await organizationService.deleteOrganization(req.user.id, req.params.id);
 
     res.status(200).json({
       success: true,
@@ -57,7 +67,7 @@ class OrganizationController {
   });
 
   getStats = asyncHandler(async (req, res) => {
-    const result = await organizationService.getGeneralStats();
+    const result = await organizationService.getGeneralStats(req.user.id);
 
     res.status(200).json({
       success: true,

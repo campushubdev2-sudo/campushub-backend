@@ -1,13 +1,12 @@
 // src/services/report.service.js
 import ReportRepository from "../repositories/report.repository.js";
-import {
-  createReportSchema,
-  downloadReportFilesSchema,
-  updateReportStatusSchema,
-  deleteReportSchema,
-} from "../validations/report.validation.js";
+import { createReportSchema } from "../validations/report.validation.js";
+import { downloadReportFilesSchema } from "../validations/report.validation.js";
+import { updateReportStatusSchema } from "../validations/report.validation.js";
+import { deleteReportSchema } from "../validations/report.validation.js";
 import { AppError } from "../middlewares/error.middleware.js";
 import mongoose from "mongoose";
+import auditLogRepository from "../repositories/audit-log.repository.js";
 
 class ReportService {
   async createReport(payload, userId) {
@@ -28,10 +27,16 @@ class ReportService {
     };
 
     const report = await ReportRepository.createReport(reportData);
+
+    await auditLogRepository.create({
+      userId,
+      action: "report.create",
+    });
+
     return await ReportRepository.findReportById(report._id);
   }
 
-  async getAllReports(query = {}) {
+  async getAllReports(actorId, query = {}) {
     const {
       page = 1,
       limit = 25,
@@ -82,10 +87,15 @@ class ReportService {
       populate,
     });
 
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "report.list",
+    });
+
     return { count, data: reports };
   }
 
-  async getReportById(reportId) {
+  async getReportById(actorId, reportId) {
     if (!reportId || !mongoose.Types.ObjectId.isValid(reportId)) {
       throw new AppError("Invalid report id", 400);
     }
@@ -101,10 +111,15 @@ class ReportService {
       throw new AppError("Report not found", 404);
     }
 
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "report.detail",
+    });
+
     return report;
   }
 
-  async downloadFiles(reportId) {
+  async downloadFiles(actorId, reportId) {
     // Validate report ID
     const { error, value } = downloadReportFilesSchema.validate({
       id: reportId,
@@ -126,13 +141,18 @@ class ReportService {
 
     const filePaths = report.filePaths || [];
 
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "report.download(s)",
+    });
+
     return {
       filePaths,
       reportType: report.reportType,
     };
   }
 
-  async updateReportStatus(payload) {
+  async updateReportStatus(actorId, payload) {
     const { error, value } = updateReportStatusSchema.validate(payload);
 
     if (error) {
@@ -149,10 +169,15 @@ class ReportService {
 
     const updatedReport = await ReportRepository.updateStatusById(id, status);
 
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "report.update-status",
+    });
+
     return updatedReport;
   }
 
-  async deleteReport(payload) {
+  async deleteReportById(actorId, payload) {
     const { error, value } = deleteReportSchema.validate(payload);
 
     if (error) {
@@ -168,6 +193,11 @@ class ReportService {
     }
 
     await ReportRepository.deleteById(id);
+
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "report.delete",
+    });
 
     return report;
   }

@@ -1,16 +1,14 @@
 import { AppError } from "../middlewares/error.middleware.js";
 import userRepository from "../repositories/user.repository.js";
 import authService from "./auth.service.js";
-import {
-  createUserSchema,
-  queryUsersSchema,
-  updateUserSchema,
-  userIdParamSchema,
-} from "../validations/user.validation.js";
+import { createUserSchema } from "../validations/user.validation.js";
+import { queryUsersSchema } from "../validations/user.validation.js";
+import { updateUserSchema } from "../validations/user.validation.js";
+import { userIdParamSchema } from "../validations/user.validation.js";
 import auditLogRepository from "../repositories/audit-log.repository.js";
 
 class UserService {
-  async createUser(payload) {
+  async createUser(actorId, payload) {
     const { error, value } = createUserSchema.validate(payload);
     if (error) {
       const message = error.details.map((detail) => detail.message).join(", ");
@@ -42,14 +40,14 @@ class UserService {
     delete user.passwordResetExpires;
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "user.create",
     });
 
     return user;
   }
 
-  async getUsers(query) {
+  async getUsers(actorId, query) {
     const { error, value } = queryUsersSchema.validate(query);
     if (error) {
       const message = error.details.map((detail) => detail.message).join(", ");
@@ -73,7 +71,7 @@ class UserService {
     }
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "user.list",
     });
 
@@ -84,19 +82,19 @@ class UserService {
     });
   }
 
-  async getUserById(id) {
-    const { error } = userIdParamSchema.validate({ id });
+  async getUserById(userId, actorId) {
+    const { error } = userIdParamSchema.validate({ id: userId });
     if (error) {
       throw new AppError("Invalid user id", 400);
     }
 
-    const user = await userRepository.findById(id);
+    const user = await userRepository.findById(userId);
     if (!user) {
       throw new AppError("User not found", 404);
     }
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "user.detail",
     });
 
@@ -104,7 +102,7 @@ class UserService {
     return user;
   }
 
-  async updateUser(id, payload) {
+  async updateUser(actorId, id, payload) {
     const { error: idError } = userIdParamSchema.validate({ id });
     if (idError) {
       throw new AppError("Invalid user id", 400);
@@ -131,14 +129,14 @@ class UserService {
     const updatedUser = await userRepository.updateById(id, value);
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "user.update",
     });
 
     return updatedUser;
   }
 
-  async deleteUser(id) {
+  async deleteUser(actorId, id) {
     const { error } = userIdParamSchema.validate({ id });
     if (error) {
       throw new AppError("Invalid user id", 400);
@@ -158,7 +156,7 @@ class UserService {
     await userRepository.deleteById(id);
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "user.delete",
     });
 
@@ -169,14 +167,14 @@ class UserService {
   /**
    * Dashboard
    */
-  async getDashboardStats() {
+  async getDashboardStats(actorId) {
     const [totalUsers, byRole] = await Promise.all([
       userRepository.getTotalUsers(),
       userRepository.getOverviewStats(),
     ]);
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId, 
       action: "user.stats.overview",
     });
 

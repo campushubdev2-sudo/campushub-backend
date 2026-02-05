@@ -3,7 +3,10 @@ import otpService from "../services/otp.service.js";
 
 class OtpController {
   sendOtp = asyncHandler(async (req, res) => {
-    const { email, expiresAt } = await otpService.sendOtp(req.body);
+    const { email, expiresAt } = await otpService.sendOtp(
+      req.user.id,
+      req.body,
+    );
 
     res.status(200).json({
       success: true,
@@ -14,7 +17,10 @@ class OtpController {
   });
 
   verifyOtp = asyncHandler(async (req, res) => {
-    const { email, verified } = await otpService.verifyOtp(req.body);
+    const { email, verified } = await otpService.verifyOtp(
+      req.user.id,
+      req.body,
+    );
 
     res.status(200).json({
       success: true,
@@ -27,7 +33,7 @@ class OtpController {
   });
 
   resendOtp = asyncHandler(async (req, res) => {
-    const { email, expiresAt } = await otpService.resend(req.body);
+    const { email, expiresAt } = await otpService.resend(req.user.id, req.body);
 
     res.status(200).json({
       success: true,
@@ -38,7 +44,7 @@ class OtpController {
   });
 
   cleanupExpiredOtps = asyncHandler(async (req, res) => {
-    const result = await otpService.cleanupExpiredOtps();
+    const result = await otpService.cleanupExpiredOtps(req.user.id);
 
     res.status(200).json({
       success: true,
@@ -47,7 +53,7 @@ class OtpController {
   });
 
   getStats = asyncHandler(async (req, res) => {
-    const stats = await otpService.getOtpStatistics();
+    const stats = await otpService.getOtpStatistics(req.user.id);
 
     res.status(200).json({
       success: true,

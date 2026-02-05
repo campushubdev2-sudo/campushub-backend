@@ -1,16 +1,14 @@
 import organizationRepository from "../repositories/organization.repository.js";
 import userRepository from "../repositories/user.repository.js";
-import {
-  createOrganizationSchema,
-  getOrganizationsSchema,
-  updateOrganizationSchema,
-} from "../validations/organization.validation.js";
+import { createOrganizationSchema } from "../validations/organization.validation.js";
+import { getOrganizationsSchema } from "../validations/organization.validation.js";
+import { updateOrganizationSchema } from "../validations/organization.validation.js";
 import { AppError } from "../middlewares/error.middleware.js";
 import { mapOrganization } from "../utils/helper.js";
 import auditLogRepository from "../repositories/audit-log.repository.js";
 
 class OrganizationService {
-  async createOrganization(payload) {
+  async createOrganization(actorId, payload) {
     const { error, value } = createOrganizationSchema.validate(payload);
 
     if (error) {
@@ -36,28 +34,28 @@ class OrganizationService {
     const organization = await organizationRepository.findById(created._id);
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "org.create",
     });
 
     return mapOrganization(organization);
   }
 
-  async getOrganization(id) {
+  async getOrganization(actorId, id) {
     const organization = await organizationRepository.findById(id);
     if (!organization) {
       throw new AppError("Organization not found", 404);
     }
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "org.get",
     });
 
     return mapOrganization(organization);
   }
 
-  async updateOrganization(id, payload) {
+  async updateOrganization(actorId, id, payload) {
     const { error, value } = updateOrganizationSchema.validate(payload);
     if (error) {
       const message = error.details.map((detail) => detail.message).join(", ");
@@ -70,28 +68,28 @@ class OrganizationService {
     }
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "org.update",
     });
 
     return updatedOrg;
   }
 
-  async deleteOrganization(id) {
+  async deleteOrganization(actorId, id) {
     const deletedOrg = await organizationRepository.deleteById(id);
     if (!deletedOrg) {
       throw new AppError("Organization not found", 404);
     }
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "org.delete",
     });
 
     return deletedOrg;
   }
 
-  async getAllOrganizations(query) {
+  async getAllOrganizations(actorId, query) {
     const { error, value } = getOrganizationsSchema.validate(query);
     if (error) {
       const message = error.details.map((detail) => detail.message).join(", ");
@@ -112,7 +110,7 @@ class OrganizationService {
     const total = await organizationRepository.count(filter);
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "org.list",
     });
 
@@ -127,12 +125,12 @@ class OrganizationService {
     };
   }
 
-  async getGeneralStats() {
+  async getGeneralStats(actorId) {
     const stats = await organizationRepository.getStats();
     const adviserStats = await organizationRepository.getAdviserStats();
 
     await auditLogRepository.create({
-      userId: req.user.id,
+      userId: actorId,
       action: "org.stats.overview",
     });
 

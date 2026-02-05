@@ -3,7 +3,7 @@ import userService from "../services/user.service.js";
 
 class UserController {
   createUser = asyncHandler(async (req, res) => {
-    const newUser = await userService.createUser(req.body);
+    const newUser = await userService.createUser(req.user.id, req.body);
 
     res.status(201).json({
       success: true,
@@ -13,7 +13,7 @@ class UserController {
   });
 
   getUsers = asyncHandler(async (req, res) => {
-    const result = await userService.getUsers(req.query);
+    const result = await userService.getUsers(req.user.id, req.query);
 
     res.status(200).json({
       success: true,
@@ -28,7 +28,7 @@ class UserController {
   });
 
   getUserById = asyncHandler(async (req, res) => {
-    const user = await userService.getUserById(req.params.id);
+    const user = await userService.getUserById(req.params.id, req.user.id);
 
     res.status(200).json({
       success: true,
@@ -38,7 +38,7 @@ class UserController {
   });
 
   updateUser = asyncHandler(async (req, res) => {
-    const updatedUser = await userService.updateUser(req.params.id, req.body);
+    const updatedUser = await userService.updateUser(req.user.id, req.params.id, req.body);
 
     res.status(200).json({
       success: true,
@@ -48,7 +48,7 @@ class UserController {
   });
 
   deleteUser = asyncHandler(async (req, res) => {
-    await userService.deleteUser(req.params.id);
+    await userService.deleteUser(req.user.id, req.params.id);
 
     res.status(200).json({
       success: true,
@@ -57,8 +57,8 @@ class UserController {
     });
   });
 
-  getUserStats = asyncHandler(async (_req, res) => {
-    const stats = await userService.getDashboardStats();
+  getUserStats = asyncHandler(async (req, res) => {
+    const stats = await userService.getDashboardStats(req.user.id);
 
     res.status(200).json({
       success: true,

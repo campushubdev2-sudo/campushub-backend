@@ -4,6 +4,7 @@ import eventNotificationService from "../services/event-notification.service.js"
 class EventNotificationController {
   createNotification = asyncHandler(async (req, res) => {
     const result = await eventNotificationService.createEventNotification(
+      req.user.id,
       req.body,
     );
 
@@ -16,6 +17,7 @@ class EventNotificationController {
 
   createBulkNotifications = asyncHandler(async (req, res) => {
     const result = await eventNotificationService.createBulkEventNotifications(
+      req.user.id,
       req.body,
     );
 
@@ -28,6 +30,7 @@ class EventNotificationController {
 
   getAllEventNotifications = asyncHandler(async (req, res) => {
     const result = await eventNotificationService.getAllEventNotifications(
+      req.user.id,
       req.query,
     );
 
@@ -43,8 +46,10 @@ class EventNotificationController {
 
   getEventNotificationById = asyncHandler(async (req, res) => {
     const notificationId = req.params.id;
-    const result =
-      await eventNotificationService.getEventNotificationById(notificationId);
+    const result = await eventNotificationService.getEventNotificationById(
+      req.user.id,
+      notificationId,
+    );
 
     res.status(200).json({
       success: true,
@@ -54,10 +59,13 @@ class EventNotificationController {
   });
 
   updateEventNotification = asyncHandler(async (req, res) => {
-    const result = await eventNotificationService.updateEventNotification({
-      id: req.params.id,
-      updateData: req.body,
-    });
+    const result = await eventNotificationService.updateEventNotification(
+      req.user.id,
+      {
+        id: req.params.id,
+        updateData: req.body,
+      },
+    );
 
     res.status(200).json({
       statusCode: 200,
@@ -68,14 +76,40 @@ class EventNotificationController {
   });
 
   deleteEventNotification = asyncHandler(async (req, res) => {
-    const result = await eventNotificationService.deleteEventNotification({
-      id: req.params.id,
-    });
+    const result = await eventNotificationService.deleteEventNotification(
+      req.user.id,
+      {
+        id: req.params.id,
+      },
+    );
 
     res.status(200).json({
       statusCode: 200,
       success: true,
       message: "Event notification deleted successfully",
+      data: result,
+    });
+  });
+
+  getOverallStats = asyncHandler(async (req, res) => {
+    const result = await eventNotificationService.getOverallStats(req.user.id);
+
+    res.status(200).json({
+      success: true,
+      message: "Overall event notification stats retrieved successfully",
+      data: result,
+    });
+  });
+
+  getEventStats = asyncHandler(async (req, res) => {
+    const result = await eventNotificationService.getEventStats(
+      req.user.id,
+      req.params.id,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Event notification stats retrieved successfully",
       data: result,
     });
   });

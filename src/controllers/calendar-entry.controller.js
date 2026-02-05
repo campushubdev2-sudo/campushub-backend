@@ -3,7 +3,10 @@ import calendarEntryService from "../services/calendar-entry.service.js";
 
 class CalendarEntryController {
   createCalendarEntry = asyncHandler(async (req, res) => {
-    const result = await calendarEntryService.createCalendarEntry(req.body);
+    const result = await calendarEntryService.createCalendarEntry(
+      req.user.id,
+      req.body,
+    );
 
     res.status(201).json({
       success: true,
@@ -16,7 +19,10 @@ class CalendarEntryController {
   });
 
   getAll = asyncHandler(async (req, res) => {
-    const result = await calendarEntryService.getCalendarEntries(req.query);
+    const result = await calendarEntryService.getCalendarEntries(
+      req.user.id,
+      req.query,
+    );
 
     res.status(200).json({
       success: true,
@@ -26,9 +32,26 @@ class CalendarEntryController {
     });
   });
 
+  getCalendarEntryById = asyncHandler(async (req, res) => {
+    const result = await calendarEntryService.getCalendarEntryById(
+      req.user.id,
+      req.params.id,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Calendar entry retrieved successfully",
+      data: result,
+    });
+  });
+
   updateCalendarEntry = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const result = await calendarEntryService.updateCalendarEntry(id, req.body);
+    const result = await calendarEntryService.updateCalendarEntry(
+      req.user.id,
+      id,
+      req.body,
+    );
 
     res.status(200).json({
       success: true,
@@ -38,7 +61,7 @@ class CalendarEntryController {
   });
 
   deleteCalendarEntry = asyncHandler(async (req, res) => {
-    const result = await calendarEntryService.deleteCalendarEntry({
+    const result = await calendarEntryService.deleteCalendarEntry(req.user.id, {
       id: req.params.id,
     });
 
@@ -50,7 +73,7 @@ class CalendarEntryController {
   });
 
   getCalendarStats = asyncHandler(async (req, res) => {
-    const data = await calendarEntryService.getStats();
+    const data = await calendarEntryService.getStats(req.user.id);
 
     res.status(200).json({
       success: true,

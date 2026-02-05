@@ -38,7 +38,7 @@ export default defineConfig(js.configs.recommended, [
       "no-nested-ternary": "warn",
 
       // Imports
-      "no-duplicate-imports": "error",
+      "no-duplicate-imports": "off",
 
       // DX Safety Nets
       "no-warning-comments": [

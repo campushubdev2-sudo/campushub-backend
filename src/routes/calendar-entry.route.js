@@ -28,6 +28,13 @@ calendarEntryRouter.get(
 );
 
 calendarEntryRouter.get(
+  "/:id",
+  authenticate,
+  authorize("admin"),
+  calendarEntryController.getCalendarEntryById,
+);
+
+calendarEntryRouter.get(
   "/stats",
   authenticate,
   authorize("admin"),

@@ -1,16 +1,15 @@
 import calendarEntryRepository from "../repositories/calendar-entry.repository.js";
-import {
-  createCalendarEntrySchema,
-  getCalendarEntriesSchema,
-  deleteCalendarEntrySchema,
-  updateCalendarEntrySchema,
-} from "../validations/calendar-entry.validation.js";
+import { createCalendarEntrySchema } from "../validations/calendar-entry.validation.js";
+import { getCalendarEntriesSchema } from "../validations/calendar-entry.validation.js";
+import { deleteCalendarEntrySchema } from "../validations/calendar-entry.validation.js";
+import { updateCalendarEntrySchema } from "../validations/calendar-entry.validation.js";
 import { AppError } from "../middlewares/error.middleware.js";
 import schoolEventRepository from "../repositories/school-event.repository.js";
 import userRepository from "../repositories/user.repository.js";
+import auditLogRepository from "../repositories/audit-log.repository.js";
 
 class CalendarEntryService {
-  async createCalendarEntry(payload) {
+  async createCalendarEntry(actorId, payload) {
     const { error, value } = createCalendarEntrySchema.validate(payload);
 
     if (error) {
@@ -48,13 +47,18 @@ class CalendarEntryService {
       eventId,
     );
 
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "calendar-entry.create",
+    });
+
     return {
       calendarEntry: populatedEntry,
       event,
     };
   }
 
-  async getCalendarEntries(payload) {
+  async getCalendarEntries(actorId, payload) {
     const { error, value } = getCalendarEntriesSchema.validate(payload);
 
     if (error) {
@@ -86,6 +90,11 @@ class CalendarEntryService {
       calendarEntryRepository.count(query),
     ]);
 
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "calendar-entry.list",
+    });
+
     return {
       items,
       meta: {
@@ -97,7 +106,21 @@ class CalendarEntryService {
     };
   }
 
-  async updateCalendarEntry(id, payload) {
+  async getCalendarEntryById(actorId, id) {
+    const entry = await calendarEntryRepository.findById(id);
+    if (!entry) {
+      throw new AppError("Calendar entry not found", 404);
+    }
+
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "calendar-entry.detail",
+    });
+
+    return entry;
+  }
+
+  async updateCalendarEntry(actorId, id, payload) {
     const { error, value } = updateCalendarEntrySchema.validate(payload);
 
     if (error) {
@@ -136,10 +159,15 @@ class CalendarEntryService {
       createdBy,
     });
 
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "calendar-entry.update",
+    });
+
     return updatedCalendarEntry;
   }
 
-  async deleteCalendarEntry(payload) {
+  async deleteCalendarEntry(actorId, payload) {
     const { error, value } = deleteCalendarEntrySchema.validate(payload);
     if (error) {
       const message = error.details.map((detail) => detail.message).join(", ");
@@ -154,10 +182,21 @@ class CalendarEntryService {
     }
 
     const deletedEntry = await calendarEntryRepository.deleteById(id);
+
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "calendar-entry.delete",
+    });
+
     return deletedEntry;
   }
 
-  async getStats() {
+  async getStats(actorId) {
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "calendar-entry.stats.overview",
+    });
+
     return {
       total: await calendarEntryRepository.count(),
       byUser: await calendarEntryRepository.countByUser(),

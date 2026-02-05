@@ -1,19 +1,18 @@
 import officerRepository from "../repositories/officer.repository.js";
-import {
-  createOfficerSchema,
-  getOfficersSchema,
-  getOfficerByIdSchema,
-  updateOfficerSchema,
-  deleteOfficerSchema,
-  getOfficersNearTermEndSchema,
-  getOfficersStatsByPeriodSchema,
-} from "../validations/officer.validation.js";
+import { createOfficerSchema } from "../validations/officer.validation.js";
+import { getOfficersSchema } from "../validations/officer.validation.js";
+import { getOfficerByIdSchema } from "../validations/officer.validation.js";
+import { updateOfficerSchema } from "../validations/officer.validation.js";
+import { deleteOfficerSchema } from "../validations/officer.validation.js";
+import { getOfficersNearTermEndSchema } from "../validations/officer.validation.js";
+import { getOfficersStatsByPeriodSchema } from "../validations/officer.validation.js";
 import { AppError } from "../middlewares/error.middleware.js";
 import userRepository from "../repositories/user.repository.js";
 import organizationRepository from "../repositories/organization.repository.js";
+import auditLogRepository from "../repositories/audit-log.repository.js";
 
 class OfficerService {
-  async createOfficer(payload) {
+  async createOfficer(actorId, payload) {
     const { error, value } = createOfficerSchema.validate(payload);
     if (error) {
       const message = error.details.map((detail) => detail.message);
@@ -52,10 +51,15 @@ class OfficerService {
       endTerm,
     });
 
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "officer.create",
+    });
+
     return officer;
   }
 
-  async deleteOfficerById(payload) {
+  async deleteOfficerById(actorId, payload) {
     const { error, value } = deleteOfficerSchema.validate(payload);
     if (error) {
       const message = error.details.map((detail) => detail.message).join(", ");
@@ -76,10 +80,16 @@ class OfficerService {
     if (!deletedOfficer) {
       throw new AppError("Failed to delete officer", 500);
     }
+
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "officer.delete",
+    });
+
     return officer;
   }
 
-  async getOfficers(query) {
+  async getOfficers(actorId, query) {
     const { error, value } = getOfficersSchema.validate(query);
     if (error) {
       const message = error.details.map((d) => d.message);
@@ -109,6 +119,11 @@ class OfficerService {
       limit,
     });
 
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "officer.list",
+    });
+
     return {
       items,
       meta: {
@@ -120,7 +135,7 @@ class OfficerService {
     };
   }
 
-  async getOfficerById(params) {
+  async getOfficerById(actorId, params) {
     const { error, value } = getOfficerByIdSchema.validate(params);
     if (error) {
       const message = error.details.map((detail) => detail.message);
@@ -134,10 +149,15 @@ class OfficerService {
       throw new AppError("Officer not found", 404);
     }
 
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "officer.detail",
+    });
+
     return officer;
   }
 
-  async updateOfficer(id, payload) {
+  async updateOfficer(actorId, id, payload) {
     const { error, value } = updateOfficerSchema.validate(payload);
 
     if (error) {
@@ -175,10 +195,16 @@ class OfficerService {
     }
 
     const updatedOfficer = await officerRepository.updateById(id, value);
+
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "officer.update",
+    });
+
     return updatedOfficer;
   }
 
-  async getOfficerStats() {
+  async getOfficerStats(actorId) {
     const [
       totalOfficers,
       activeOfficers,
@@ -195,6 +221,11 @@ class OfficerService {
       officerRepository.getTermDurationStats(),
     ]);
 
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "officer.stats.overview",
+    });
+
     return {
       summary: {
         totalOfficers,
@@ -209,7 +240,7 @@ class OfficerService {
     };
   }
 
-  async getOfficersByPeriod(payload) {
+  async getOfficersByPeriod(actorId, payload) {
     const { error, value } = getOfficersStatsByPeriodSchema.validate(payload);
     if (error) {
       const message = error.details.map((detail) => detail.message).join(", ");
@@ -219,17 +250,27 @@ class OfficerService {
     const { period } = value;
     const result = await officerRepository.getOfficersByTimePeriod(period);
 
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "officer.stats.period",
+    });
+
     return {
       period,
       data: result,
     };
   }
 
-  async getOfficersDetailed() {
+  async getOfficersDetailed(actorId) {
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "officer.stats.detailed",
+    });
+
     return await officerRepository.getOfficersWithUserDetails();
   }
 
-  async getOfficersNearTermEnd(payload) {
+  async getOfficersNearTermEnd(actorId, payload) {
     const { error, value } = getOfficersNearTermEndSchema.validate(payload);
     if (error) {
       const message = error.details.map((detail) => detail.message).join(", ");
@@ -239,6 +280,11 @@ class OfficerService {
     const { days } = value;
     const result = await officerRepository.getOfficersNearTermEnd(days);
 
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "officer.near-term-end",
+    });
+
     return {
       days,
       count: result.length,
@@ -246,7 +292,7 @@ class OfficerService {
     };
   }
 
-  async getOrganizationOfficerStats(orgId) {
+  async getOrganizationOfficerStats(actorId, orgId) {
     // Validate orgId
     if (!orgId.match(/^[0-9a-fA-F]{24}$/)) {
       throw new AppError("Invalid organization ID format", 400);
@@ -256,6 +302,11 @@ class OfficerService {
     if (!result) {
       throw new AppError("Organization not found", 404);
     }
+
+    await auditLogRepository.create({
+      userId: actorId,
+      action: "officer.stats.organization",
+    });
 
     return {
       organization: {

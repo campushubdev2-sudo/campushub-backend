@@ -55,7 +55,7 @@ class ReportController {
   });
 
   getAllReports = asyncHandler(async (req, res) => {
-    const result = await reportService.getAllReports(req.query);
+    const result = await reportService.getAllReports(req.user.id, req.query);
 
     res.status(200).json({
       success: true,
@@ -67,7 +67,7 @@ class ReportController {
   getReportById = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
-    const report = await reportService.getReportById(id);
+    const report = await reportService.getReportById(req.user.id, id);
 
     res.status(200).json({
       success: true,
@@ -76,7 +76,10 @@ class ReportController {
   });
 
   downloadReportFiles = asyncHandler(async (req, res) => {
-    const result = await reportService.downloadFiles(req.params.id);
+    const result = await reportService.downloadFiles(
+      req.user.id,
+      req.params.id,
+    );
 
     // MULTIPLE FILES → ZIP
     if (result.filePaths.length > 1) {
@@ -113,7 +116,7 @@ class ReportController {
   });
 
   updateStatus = asyncHandler(async (req, res) => {
-    const result = await reportService.updateReportStatus({
+    const result = await reportService.updateReportStatus(req.user.id, {
       id: req.params.id,
       status: req.body.status,
     });
@@ -125,8 +128,8 @@ class ReportController {
     });
   });
 
-  deleteReport = asyncHandler(async (req, res) => {
-    const result = await reportService.deleteReport({
+  deleteReportById = asyncHandler(async (req, res) => {
+    const result = await reportService.deleteReportById(req.user.id, {
       id: req.params.id,
     });
 
