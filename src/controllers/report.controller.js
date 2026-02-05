@@ -116,10 +116,13 @@ class ReportController {
   });
 
   updateStatus = asyncHandler(async (req, res) => {
-    const result = await reportService.updateReportStatus(req.user.id, {
+    const payload = {
       id: req.params.id,
       status: req.body.status,
-    });
+      ...(req.body.message && { message: req.body.message }),
+    };
+
+    const result = await reportService.updateReportStatus(req.user.id, payload);
 
     res.status(200).json({
       success: true,

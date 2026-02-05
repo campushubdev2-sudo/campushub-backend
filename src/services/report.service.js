@@ -7,6 +7,7 @@ import { deleteReportSchema } from "../validations/report.validation.js";
 import { AppError } from "../middlewares/error.middleware.js";
 import mongoose from "mongoose";
 import auditLogRepository from "../repositories/audit-log.repository.js";
+import smsService from "./sms.service.js";
 
 class ReportService {
   async createReport(payload, userId) {
@@ -160,11 +161,29 @@ class ReportService {
       throw new AppError(message, 400);
     }
 
-    const { id, status } = value;
+    const { id, status, message } = value;
 
-    const report = await ReportRepository.findById(id);
+    const report = await ReportRepository.findById(id, {
+      populate: "submittedBy",
+    });
     if (!report) {
       throw new AppError("Report not found", 404);
+    }
+
+    if (report.status === status) {
+      return report;
+    }
+
+    // pending -> approved
+    const to = report.submittedBy?.phoneNumber;
+
+    if (!to) {
+      throw new AppError("User phone number not found", 400);
+    }
+
+    if (report.status === "pending" && status === "approved") {
+      // TODO: do something when pending is approved
+      await smsService.sendSMS({ to, message }); // auto-generated or user defined?
     }
 
     const updatedReport = await ReportRepository.updateStatusById(id, status);

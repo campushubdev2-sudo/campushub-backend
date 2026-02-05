@@ -54,6 +54,15 @@ const downloadReportFilesSchema = Joi.object({
 const updateReportStatusSchema = Joi.object({
   id: Joi.string().hex().length(24).required(),
   status: Joi.string().valid("pending", "approved", "rejected").required(),
+  // message: Joi.string()
+  //   .trim()
+  //   .default("Your report has been approved.")
+  //   .optional(),
+  message: Joi.when("status", {
+    is: "approved",
+    then: Joi.string().trim().default("Your report has been approved."),
+    otherwise: Joi.forbidden(),
+  }),
 }).options({
   abortEarly: false,
   stripUnknown: true,
