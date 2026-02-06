@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:watch": "nodemon --watch src --ext js,mjs,cjs --exec \"eslint .\"",
-    "setup:uploads": "node -e \"require('mkdirp').sync('uploads/reports/bylaws'); require('mkdirp').sync('uploads/reports/proposal'); require('mkdirp').sync('uploads/reports/financial'); require('mkdirp').sync('uploads/reports/actionPlan'); console.log('Uploads directory created')\""
+    "setup:uploads": "mkdirp uploads/reports/bylaws uploads/reports/proposal uploads/reports/financial uploads/reports/actionPlan",
+    "postinstall": "npm run setup:uploads"
   },
   "dependencies": {
     "archiver": "^7.0.1",
@@ -25,14 +26,14 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.1.5",
     "multer": "^2.0.2",
-    "nodemailer": "^7.0.13"
+    "nodemailer": "^7.0.13",
+    "mkdirp": "^3.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "eslint": "^9.39.2",
     "express-async-handler": "^1.2.0",
     "globals": "^17.1.0",
-    "mkdirp": "^3.0.1",
     "nodemon": "^3.1.11"
   }
 }
