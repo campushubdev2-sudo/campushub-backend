@@ -17,6 +17,7 @@ import officerRoutes from "./routes/officer.route.js";
 import calendarEntryRoutes from "./routes/calendar-entry.route.js";
 import eventNotificationRoutes from "./routes/event-notification.route.js";
 import reportsRoutes from "./routes/report.route.js";
+import auditLogRoutes from "./routes/audit-log.route.js";
 import { NODE_ENV } from "./config/env.js";
 
 const app = express();
@@ -41,6 +42,7 @@ app.use("/api/v1/officers", officerRoutes);
 app.use("/api/v1/calendar-entries", calendarEntryRoutes);
 app.use("/api/v1/event-notifications", eventNotificationRoutes);
 app.use("/api/v1/reports", reportsRoutes);
+app.use("/api/v1/audit-logs", auditLogRoutes);
 
 app.use(errorMiddleware);
 

@@ -12,8 +12,18 @@ class AuditLogRepository {
     const doc = await AuditLog.create(payload);
     return doc.toObject();
   }
+
+  async findAll({ filter = {}, sort = "-createdAt", fields = "" }) {
+    return AuditLog.find(filter)
+      .populate("userId", "username email role")
+      .sort(sort)
+      .select(fields)
+      .lean();
+  }
+
+  async findById(id, { populate = [] } = {}) {
+    return AuditLog.findById(id).populate(populate).lean();
+  }
 }
 
 export default new AuditLogRepository();
-
-
