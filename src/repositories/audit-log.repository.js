@@ -24,6 +24,14 @@ class AuditLogRepository {
   async findById(id, { populate = [] } = {}) {
     return AuditLog.findById(id).populate(populate).lean();
   }
+
+  async deleteById(id) {
+    return AuditLog.findByIdAndDelete(id).lean();
+  }
+
+  async deleteAll() {
+    return AuditLog.deleteMany({});
+  }
 }
 
 export default new AuditLogRepository();

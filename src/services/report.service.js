@@ -182,7 +182,6 @@ class ReportService {
     }
 
     if (report.status === "pending" && status === "approved") {
-      // TODO: do something when pending is approved
       await smsService.sendSMS({ to, message }); // auto-generated or user defined?
     }
 
