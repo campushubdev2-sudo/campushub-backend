@@ -1,10 +1,19 @@
+// @ts-check
 import asyncHandler from "express-async-handler";
 import organizationService from "../services/organization.service.js";
 
+/**
+ * @typedef {import('express').Request & { user: { id: string } }} AuthenticatedRequest
+ * @typedef {import('express').Response} Response
+ */
+
 class OrganizationController {
+  /**
+   * @param {Response} res
+   */
   createOrganization = asyncHandler(async (req, res) => {
     const result = await organizationService.createOrganization(
-      req.user.id,
+      /** @type {AuthenticatedRequest} */ (req).user.id,
       req.body,
     );
 
@@ -15,9 +24,12 @@ class OrganizationController {
     });
   });
 
+  /**
+   * @param {Response} res
+   */
   getOrganizations = asyncHandler(async (req, res) => {
     const result = await organizationService.getAllOrganizations(
-      req.user.id,
+      /** @type {AuthenticatedRequest} */ (req).user.id,
       req.query,
     );
 
@@ -29,9 +41,12 @@ class OrganizationController {
     });
   });
 
+  /**
+   * @param {Response} res
+   */
   getOrganization = asyncHandler(async (req, res) => {
     const result = await organizationService.getOrganization(
-      req.user.id,
+      /** @type {AuthenticatedRequest} */ (req).user.id,
       req.params.id,
     );
 
@@ -42,9 +57,12 @@ class OrganizationController {
     });
   });
 
+  /**
+   * @param {Response} res
+   */
   updateOrganization = asyncHandler(async (req, res) => {
     const result = await organizationService.updateOrganization(
-      req.user.id,
+      /** @type {AuthenticatedRequest} */ (req).user.id,
       req.params.id,
       req.body,
     );
@@ -56,8 +74,14 @@ class OrganizationController {
     });
   });
 
+  /**
+   * @param {Response} res
+   */
   deleteOrganization = asyncHandler(async (req, res) => {
-    await organizationService.deleteOrganization(req.user.id, req.params.id);
+    await organizationService.deleteOrganization(
+      /** @type {AuthenticatedRequest} */ (req).user.id,
+      req.params.id,
+    );
 
     res.status(200).json({
       success: true,
@@ -66,8 +90,13 @@ class OrganizationController {
     });
   });
 
+  /**
+   * @param {Response} res
+   */
   getStats = asyncHandler(async (req, res) => {
-    const result = await organizationService.getGeneralStats(req.user.id);
+    const result = await organizationService.getGeneralStats(
+      /** @type {AuthenticatedRequest} */ (req).user.id,
+    );
 
     res.status(200).json({
       success: true,

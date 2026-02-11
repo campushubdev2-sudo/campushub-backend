@@ -4,6 +4,14 @@ import { AppError } from "./error.middleware.js";
 import authService from "../services/auth.service.js";
 
 /**
+ * @typedef {Object} AuthUser
+ * @property {string} id
+ * @property {string} username
+ * @property {string} email
+ * @property {string} role
+ */
+
+/**
  * Authentication Middleware - Protects routes by verifying JWT tokens
  * @param {import("express").Request} req
  * @param {import("express").Response} _res
@@ -23,7 +31,7 @@ const authenticate = async (req, _res, next) => {
     // Verify token using service
     const { userId, username, email, role } = authService.verifyToken(token);
 
-    // Attach user to request object
+    /** @type {AuthUser} */
     req.user = {
       id: userId,
       username,

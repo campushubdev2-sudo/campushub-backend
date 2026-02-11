@@ -1,5 +1,7 @@
-// src/constants/officer-positions.js
-const BSBA_OFFICER_POSITIONS = [
+// @ts-check
+
+/** @type {readonly string[]} */
+const BSBA_OFFICER_POSITIONS = Object.freeze([
   "President",
   "Executive Vice President",
   "General Secretary",
@@ -36,9 +38,11 @@ const BSBA_OFFICER_POSITIONS = [
   "Representative 4th year FM",
   "Representative 4th year MM",
   "Representative 4th year HRDM",
-];
+]);
 
-// Avoid magic strings by exposing named constants
+/** @typedef {typeof BSBA_OFFICER_POSITIONS[number]} BSBAOfficerPosition */
+
+/** @type {Readonly<Record<string, BSBAOfficerPosition>>} */
 const BSBA_OFFICER_POSITION_MAP = {
   PRESIDENT: BSBA_OFFICER_POSITIONS[0],
   EXECUTIVE_VICE_PRESIDENT: BSBA_OFFICER_POSITIONS[1],

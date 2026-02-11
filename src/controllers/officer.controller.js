@@ -1,9 +1,21 @@
+// @ts-check
 import asyncHandler from "express-async-handler";
 import officerService from "../services/officer.service.js";
 
+/**
+ * @typedef {import('express').Request & { user: { id: string } }} AuthenticatedRequest
+ * @typedef {import('express').Response} Response
+ */
+
 class OfficerController {
+  /**
+   * @param {Response} res
+   */
   createOfficer = asyncHandler(async (req, res) => {
-    const officer = await officerService.createOfficer(req.user.id, req.body);
+    const officer = await officerService.createOfficer(
+      /** @type {AuthenticatedRequest} */ (req).user.id,
+      req.body,
+    );
 
     res.status(201).json({
       success: true,
@@ -12,8 +24,14 @@ class OfficerController {
     });
   });
 
+  /**
+   * @param {Response} res
+   */
   getOfficers = asyncHandler(async (req, res) => {
-    const result = await officerService.getOfficers(req.user.id, req.query);
+    const result = await officerService.getOfficers(
+      /** @type {AuthenticatedRequest} */ (req).user.id,
+      req.query,
+    );
 
     res.status(200).json({
       success: true,
@@ -22,9 +40,12 @@ class OfficerController {
     });
   });
 
+  /**
+   * @param {Response} res
+   */
   getOfficerById = asyncHandler(async (req, res) => {
     const officer = await officerService.getOfficerById(
-      req.user.id,
+      /** @type {AuthenticatedRequest} */ (req).user.id,
       req.params,
     );
 
@@ -35,10 +56,13 @@ class OfficerController {
     });
   });
 
+  /**
+   * @param {Response} res
+   */
   updateOfficer = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const result = await officerService.updateOfficer(
-      req.user.id,
+      /** @type {AuthenticatedRequest} */ (req).user.id,
       id,
       req.body,
     );
@@ -50,9 +74,12 @@ class OfficerController {
     });
   });
 
+  /**
+   * @param {Response} res
+   */
   deleteOfficer = asyncHandler(async (req, res) => {
     const result = await officerService.deleteOfficerById(
-      req.user.id,
+      /** @type {AuthenticatedRequest} */ (req).user.id,
       req.params,
     );
 
@@ -63,8 +90,13 @@ class OfficerController {
     });
   });
 
+  /**
+   * @param {Response} res
+   */
   getOfficerStats = asyncHandler(async (req, res) => {
-    const result = await officerService.getOfficerStats(req.user.id);
+    const result = await officerService.getOfficerStats(
+      /** @type {AuthenticatedRequest} */ (req).user.id,
+    );
 
     res.status(200).json({
       success: true,
@@ -73,9 +105,12 @@ class OfficerController {
     });
   });
 
+  /**
+   * @param {Response} res
+   */
   getOfficersByPeriod = asyncHandler(async (req, res) => {
     const result = await officerService.getOfficersByPeriod(
-      req.user.id,
+      /** @type {AuthenticatedRequest} */ (req).user.id,
       req.query,
     );
 
@@ -86,8 +121,13 @@ class OfficerController {
     });
   });
 
+  /**
+   * @param {Response} res
+   */
   getOfficersDetailed = asyncHandler(async (req, res) => {
-    const result = await officerService.getOfficersDetailed(req.user.id);
+    const result = await officerService.getOfficersDetailed(
+      /** @type {AuthenticatedRequest} */ (req).user.id,
+    );
 
     res.status(200).json({
       success: true,
@@ -97,9 +137,12 @@ class OfficerController {
     });
   });
 
+  /**
+   * @param {Response} res
+   */
   getOfficersNearTermEnd = asyncHandler(async (req, res) => {
     const result = await officerService.getOfficersNearTermEnd(
-      req.user.id,
+      /** @type {AuthenticatedRequest} */ (req).user.id,
       req.query,
     );
 
@@ -110,9 +153,12 @@ class OfficerController {
     });
   });
 
+  /**
+   * @param {Response} res
+   */
   getOrganizationOfficerStats = asyncHandler(async (req, res) => {
     const result = await officerService.getOrganizationOfficerStats(
-      req.user.id,
+      /** @type {AuthenticatedRequest} */ (req).user.id,
       req.params.orgId,
     );
 

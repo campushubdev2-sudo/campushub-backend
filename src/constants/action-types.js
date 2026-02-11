@@ -1,4 +1,7 @@
-const ACTION_TYPES = [
+// @ts-check
+
+/** @type {readonly string[]} */
+const ACTION_TYPES = Object.freeze([
   // AUTH
   "auth.profile.view",
   "auth.sign-up",
@@ -90,6 +93,6 @@ const ACTION_TYPES = [
   "officer.stats.organization",
   "officer.stats.period",
   "officer.near-term-end",
-];
+]);
 
 export { ACTION_TYPES };

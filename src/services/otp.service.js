@@ -16,7 +16,7 @@ class OtpService {
     this.MAX_VERIFICATION_ATTEMPTS = 5;
   }
 
-  async sendOtp(actorId, payload) {
+  async sendOtp(payload) {
     const { error, value } = sendOtpSchema.validate(payload);
     if (error) {
       const message = error.details.map((detail) => detail.message).join(", ");
@@ -46,18 +46,13 @@ class OtpService {
 
     await emailService.sendOTPEmail(email, otp);
 
-    await auditLogRepository.create({
-      userId: actorId,
-      action: "otp.send",
-    });
-
     return {
       email,
       expiresAt,
     };
   }
 
-  async resend(actorId, payload) {
+  async resend(payload) {
     const { error, value } = sendOtpSchema.validate(payload);
     if (error) {
       const message = error.details.map((detail) => detail.message).join(", ");
@@ -78,15 +73,15 @@ class OtpService {
       );
     }
 
-    await auditLogRepository.create({
-      userId: actorId,
-      action: "otp.resend",
-    });
+    // await auditLogRepository.create({
+    //   userId: actorId,
+    //   action: "otp.resend",
+    // });
 
     return await this.sendOtp({ email });
   }
 
-  async verifyOtp(actorId, payload) {
+  async verifyOtp(payload) {
     const { error, value } = verifyOtpSchema.validate(payload);
     if (error) {
       const message = error.details.map((detail) => detail.message).join(", ");
@@ -133,11 +128,6 @@ class OtpService {
 
     // clean up other OTPs for same email
     await otpRepository.deleteOtpsByEmail(email);
-
-    await auditLogRepository.create({
-      userId: actorId,
-      action: "otp.verify",
-    });
 
     return {
       email,

@@ -1,4 +1,4 @@
-// src/controllers/report.controller.js
+// @ts-check
 import asyncHandler from "express-async-handler";
 import reportService from "../services/report.service.js";
 import path from "path";
@@ -6,17 +6,38 @@ import fs from "fs";
 import archiver from "archiver";
 import { fileURLToPath } from "url";
 
+/**
+ * @typedef {{
+ *  fieldname: string
+ *  originalname: string
+ *  encoding: string
+ *  mimetype: string
+ *  size: number
+ *  destination: string
+ *  filename: string
+ *  path: string
+ * }} MulterFile
+ */
+
+/**
+ * @typedef {import("express").Request} Request
+ * @typedef {import("express").Response} Response
+ * @typedef {import('express').Request & { user: { id: string } }} AuthenticatedRequest
+ * @typedef {AuthenticatedRequest & { files?: MulterFile[] }} ReportRequest
+ */
+
 class ReportController {
+  /** @param {Response} res*/
   createReport = asyncHandler(async (req, res) => {
     try {
-      // Get uploaded files
-      const uploadedFilePaths = req.files
-        ? req.files.map((file) => {
-            const serverDir = process.cwd();
-            const relativePath = path.relative(serverDir, file.path);
-            return relativePath.replace(/\\/g, "/");
-          })
-        : [];
+      // Get uploaded files - handle array type explicitly
+      const files = req.files && Array.isArray(req.files) ? req.files : [];
+
+      const uploadedFilePaths = files.map((file) => {
+        const serverDir = process.cwd();
+        const relativePath = path.relative(serverDir, file.path);
+        return relativePath.replace(/\\/g, "/");
+      });
 
       // Combine with any file URLs sent in body
       const allFilePaths = [
@@ -30,7 +51,10 @@ class ReportController {
         filePaths: allFilePaths,
       };
 
-      const result = await reportService.createReport(reportsData, req.user.id);
+      const result = await reportService.createReport(
+        reportsData,
+        /** @type {ReportRequest} */ (req).user.id,
+      );
 
       res.status(201).json({
         success: true,
@@ -39,7 +63,7 @@ class ReportController {
       });
     } catch (error) {
       // Clean up uploaded files if there's an error
-      if (req.files) {
+      if (req.files && Array.isArray(req.files)) {
         req.files.forEach((file) => {
           try {
             if (fs.existsSync(file.path)) {
@@ -54,8 +78,12 @@ class ReportController {
     }
   });
 
+  /** @param {Response} res */
   getAllReports = asyncHandler(async (req, res) => {
-    const result = await reportService.getAllReports(req.user.id, req.query);
+    const result = await reportService.getAllReports(
+      /** @type {ReportRequest} */ (req).user.id,
+      req.query,
+    );
 
     res.status(200).json({
       success: true,
@@ -64,10 +92,14 @@ class ReportController {
     });
   });
 
+  /** @param {Response} res */
   getReportById = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
-    const report = await reportService.getReportById(req.user.id, id);
+    const report = await reportService.getReportById(
+      /** @type {ReportRequest} */ (req).user.id,
+      id,
+    );
 
     res.status(200).json({
       success: true,
@@ -75,9 +107,10 @@ class ReportController {
     });
   });
 
+  /** @param {Response} res */
   downloadReportFiles = asyncHandler(async (req, res) => {
     const result = await reportService.downloadFiles(
-      req.user.id,
+      /** @type {ReportRequest} */ (req).user.id,
       req.params.id,
     );
 
@@ -115,6 +148,7 @@ class ReportController {
     res.download(filePath);
   });
 
+  /** @param {Response} res */
   updateStatus = asyncHandler(async (req, res) => {
     const payload = {
       id: req.params.id,
@@ -122,7 +156,10 @@ class ReportController {
       ...(req.body.message && { message: req.body.message }),
     };
 
-    const result = await reportService.updateReportStatus(req.user.id, payload);
+    const result = await reportService.updateReportStatus(
+      /** @type {ReportRequest} **/ (req).user.id,
+      payload,
+    );
 
     res.status(200).json({
       success: true,
@@ -131,10 +168,14 @@ class ReportController {
     });
   });
 
+  /** @param {Response} res */
   deleteReportById = asyncHandler(async (req, res) => {
-    const result = await reportService.deleteReportById(req.user.id, {
-      id: req.params.id,
-    });
+    const result = await reportService.deleteReportById(
+      /** @type {ReportRequest} */ (req).user.id,
+      {
+        id: req.params.id,
+      },
+    );
 
     res.status(200).json({
       success: true,

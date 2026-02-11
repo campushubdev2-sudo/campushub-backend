@@ -5,10 +5,13 @@ import express from "express";
 import cors from "cors";
 
 // INTERNAL DEPENDENCIES
-import { PORT } from "./config/env.js";
-import authRoutes from "./routes/auth.routes.js";
+import { PORT, NODE_ENV } from "./config/env.js";
 import connectToDatabase from "./database/mongodb.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
+import requestLogger from "./middlewares/request-logger.middleware.js";
+
+// ROUTES
+import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import otpRoutes from "./routes/otp.routes.js";
 import schoolEventRoutes from "./routes/school-event.routes.js";
@@ -18,9 +21,10 @@ import calendarEntryRoutes from "./routes/calendar-entry.route.js";
 import eventNotificationRoutes from "./routes/event-notification.route.js";
 import reportsRoutes from "./routes/report.route.js";
 import auditLogRoutes from "./routes/audit-log.route.js";
-import { NODE_ENV } from "./config/env.js";
 
 const app = express();
+
+app.set("trust proxy", 1);
 
 if (NODE_ENV === "development") {
   app.use(cors({ origin: "http://localhost:5173" }));
@@ -28,6 +32,10 @@ if (NODE_ENV === "development") {
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+if (NODE_ENV === "development") {
+  app.use(requestLogger);
+}
 
 app.get("/", (_, res) => {
   res.send("Welcome to the campushub API!");
@@ -44,9 +52,32 @@ app.use("/api/v1/event-notifications", eventNotificationRoutes);
 app.use("/api/v1/reports", reportsRoutes);
 app.use("/api/v1/audit-logs", auditLogRoutes);
 
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Route not found",
+    path: req.originalUrl,
+  });
+});
+
 app.use(errorMiddleware);
 
-app.listen(PORT, async () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+const server = app.listen(PORT, async () => {
   await connectToDatabase();
+
+  if (NODE_ENV === "development") {
+    console.log(`Server is listening at http://localhost:${PORT}`);
+  } else {
+    console.log(`Server is running on on port ${PORT}`);
+  }
+});
+
+process.on("SIGTERM", () => {
+  console.log("Shutting down...");
+  server.close(() => process.exit(0));
+});
+
+process.on("SIGINT", () => {
+  console.log("Shutting down...");
+  server.close(() => process.exit(0));
 });

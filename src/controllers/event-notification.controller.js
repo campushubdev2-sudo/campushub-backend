@@ -1,10 +1,17 @@
+// @ts-check
 import asyncHandler from "express-async-handler";
 import eventNotificationService from "../services/event-notification.service.js";
 
+/** @typedef {import('express').Request & { user: { id: string } }} AuthenticatedRequest */
+/** @typedef {import('express').Response} Response */
+
 class EventNotificationController {
+  /**
+   * @param {Response} res
+   */
   createNotification = asyncHandler(async (req, res) => {
     const result = await eventNotificationService.createEventNotification(
-      req.user.id,
+      /** @type {AuthenticatedRequest} */ (req).user.id,
       req.body,
     );
 
@@ -15,9 +22,12 @@ class EventNotificationController {
     });
   });
 
+  /**
+   * @param {Response} res
+   */
   createBulkNotifications = asyncHandler(async (req, res) => {
     const result = await eventNotificationService.createBulkEventNotifications(
-      req.user.id,
+      /** @type {AuthenticatedRequest} */ (req).user.id,
       req.body,
     );
 
@@ -28,9 +38,12 @@ class EventNotificationController {
     });
   });
 
+  /**
+   * @param {Response} res
+   */
   getAllEventNotifications = asyncHandler(async (req, res) => {
     const result = await eventNotificationService.getAllEventNotifications(
-      req.user.id,
+      /** @type {AuthenticatedRequest} */ (req).user.id,
       req.query,
     );
 
@@ -44,10 +57,13 @@ class EventNotificationController {
     });
   });
 
+  /**
+   * @param {Response} res
+   */
   getEventNotificationById = asyncHandler(async (req, res) => {
     const notificationId = req.params.id;
     const result = await eventNotificationService.getEventNotificationById(
-      req.user.id,
+      /** @type {AuthenticatedRequest} */ (req).user.id,
       notificationId,
     );
 
@@ -58,9 +74,12 @@ class EventNotificationController {
     });
   });
 
+  /**
+   * @param {Response} res
+   */
   updateEventNotification = asyncHandler(async (req, res) => {
     const result = await eventNotificationService.updateEventNotification(
-      req.user.id,
+      /** @type {AuthenticatedRequest} */ (req).user.id,
       {
         id: req.params.id,
         updateData: req.body,
@@ -75,9 +94,12 @@ class EventNotificationController {
     });
   });
 
+  /**
+   * @param {Response} res
+   */
   deleteEventNotification = asyncHandler(async (req, res) => {
     const result = await eventNotificationService.deleteEventNotification(
-      req.user.id,
+      /** @type {AuthenticatedRequest} */ (req).user.id,
       {
         id: req.params.id,
       },
@@ -91,8 +113,13 @@ class EventNotificationController {
     });
   });
 
+  /**
+   * @param {Response} res
+   */
   getOverallStats = asyncHandler(async (req, res) => {
-    const result = await eventNotificationService.getOverallStats(req.user.id);
+    const result = await eventNotificationService.getOverallStats(
+      /** @type {AuthenticatedRequest} */ (req).user.id,
+    );
 
     res.status(200).json({
       success: true,
@@ -101,9 +128,12 @@ class EventNotificationController {
     });
   });
 
+  /**
+   * @param {Response} res
+   */
   getEventStats = asyncHandler(async (req, res) => {
     const result = await eventNotificationService.getEventStats(
-      req.user.id,
+      /** @type {AuthenticatedRequest} */ (req).user.id,
       req.params.id,
     );
 
