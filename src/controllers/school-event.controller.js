@@ -26,7 +26,7 @@ class SchoolEventController {
   /** @param {Response} res */
   getAllEvents = asyncHandler(async (req, res) => {
     const result = await schoolEventService.getAllEvents(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
+      /** @type {AuthenticatedRequest} */ (req).user?.id || null,
       req.query,
     );
 

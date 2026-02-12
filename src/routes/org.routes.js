@@ -17,14 +17,14 @@ orgRouter.use(
 orgRouter.post(
   "/",
   authenticate,
-  authorize("admin"),
+  authorize("admin", "adviser"),
   organizationController.createOrganization,
 );
 
 orgRouter.get(
   "/",
   authenticate,
-  authorize("admin"),
+  authorize("admin", "officer", "adviser"),
   organizationController.getOrganizations,
 );
 
@@ -39,7 +39,7 @@ orgRouter.get(
 orgRouter.get(
   "/:id",
   authenticate,
-  authorize("admin"),
+  authorize("admin", "officer"),
   organizationController.getOrganization,
 );
 orgRouter.put(

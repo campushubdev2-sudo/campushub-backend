@@ -90,10 +90,12 @@ class CalendarEntryService {
       calendarEntryRepository.count(query),
     ]);
 
-    await auditLogRepository.create({
-      userId: actorId,
-      action: "View Calendar Entries",
-    });
+    if (actorId) {
+      await auditLogRepository.create({
+        userId: actorId,
+        action: "View Calendar Entries",
+      });
+    }
 
     return {
       items,
@@ -112,10 +114,12 @@ class CalendarEntryService {
       throw new AppError("Calendar entry not found", 404);
     }
 
-    await auditLogRepository.create({
-      userId: actorId,
-      action: "View Calendar Entry Details",
-    });
+    if (actorId) {
+      await auditLogRepository.create({
+        userId: actorId,
+        action: "View Calendar Entry Details",
+      });
+    }
 
     return entry;
   }

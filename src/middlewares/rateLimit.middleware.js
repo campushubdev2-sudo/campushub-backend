@@ -1,3 +1,4 @@
+// @ts-check
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import { rateLimiterSchema } from "../validations/rate-limit.validation.js";
 import { AppError } from "../middlewares/error.middleware.js";
@@ -12,20 +13,21 @@ import { AppError } from "../middlewares/error.middleware.js";
 /**
  * Default key generator
  * Prefer authenticated user ID, fallback to IP
+ * @param {import("express").Request & { user?: { id: string } }} req
  */
-function defaultKeyGenerator(req) {
-  return req.user?.id || ipKeyGenerator(req.ip);
-}
+const defaultKeyGenerator = (req) => req.user?.id || ipKeyGenerator(req.ip || "");
 
 /**
  * Default rate-limit exceeded handler
+ * @param {import("express").Request} _req
+ * @param {import("express").Response} res
  */
-function defaultHandler(_req, res) {
+const defaultHandler = (_req, res) => {
   res.status(429).json({
     success: false,
     message: "Too many requests. Please try again later.",
   });
-}
+};
 
 /**
  * Reusable rate limiter factory
@@ -33,7 +35,7 @@ function defaultHandler(_req, res) {
  * @param {RateLimitOptions} options
  * @returns {import("express").RequestHandler}
  */
-function createRateLimiter(options) {
+const createRateLimiter = (options) => {
   // Apply default keyGenerator first
   const optionsWithDefaults = {
     keyGenerator: defaultKeyGenerator,
@@ -57,6 +59,6 @@ function createRateLimiter(options) {
     standardHeaders: "draft-7",
     legacyHeaders: false,
   });
-}
+};
 
 export { createRateLimiter };

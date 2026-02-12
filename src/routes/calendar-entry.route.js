@@ -1,6 +1,10 @@
 import { Router } from "express";
 
-import { authorize, authenticate } from "../middlewares/auth.middleware.js";
+import {
+  authorize,
+  authenticate,
+  optionalAuthenticate,
+} from "../middlewares/auth.middleware.js";
 import { createRateLimiter } from "../middlewares/rateLimit.middleware.js";
 import calendarEntryController from "../controllers/calendar-entry.controller.js";
 
@@ -16,21 +20,21 @@ calendarEntryRouter.use(
 calendarEntryRouter.post(
   "/",
   authenticate,
-  authorize("admin"),
+  authorize("admin", "adviser"),
   calendarEntryController.createCalendarEntry,
 );
 
 calendarEntryRouter.get(
   "/",
-  authenticate,
-  authorize("admin"),
+  optionalAuthenticate,
+  authorize("admin", "student", "officer", "guest"),
   calendarEntryController.getAll,
 );
 
 calendarEntryRouter.get(
   "/:id",
-  authenticate,
-  authorize("admin"),
+  optionalAuthenticate,
+  authorize("admin", "student", "guest", "officer"),
   calendarEntryController.getCalendarEntryById,
 );
 

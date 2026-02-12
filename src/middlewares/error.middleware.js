@@ -1,15 +1,35 @@
-// src/middlewares/error.middleware.js
-
+// @ts-check
 import { NODE_ENV } from "../config/env.js";
+
+/**
+ * @typedef {Object} ErrorWithCode
+ * @property {number} [code]
+ */
+
+/**
+ * @typedef {Object} MongooseValidationErrors
+ * @property {Record<string, {message: string}>} [errors]
+ */
+
+/**
+ * @typedef {Error & ErrorWithCode & MongooseValidationErrors & Partial<AppError>} ExtendedError
+ */
+
 /**
  * Global Error Handler Middleware
- * @param {Error} err
+ * @param {ExtendedError} err
  * @param {import("express").Request} _req
  * @param {import("express").Response} res
  * @param {import("express").NextFunction} next
  * @return {void}
  */
 const errorMiddleware = (err, _req, res, next) => {
+  // Prevent infinite error loops
+  if (res.headersSent) {
+    next(err);
+    return;
+  }
+
   try {
     /** @type {AppError} */
     let error =
@@ -41,9 +61,20 @@ const errorMiddleware = (err, _req, res, next) => {
       error = new AppError(message, 400);
     }
 
+    // JWT Errors
+    if (err.name === "JsonWebTokenError") {
+      const message = "Invalid token. Please log in again.";
+      error = new AppError(message, 401);
+    }
+
+    if (err.name === "TokenExpiredError") {
+      const message = "Your token has expired. Please log in again.";
+      error = new AppError(message, 401);
+    }
+
     if (NODE_ENV === "development") {
       console.log("\n======================================================");
-      console.error("[src/middlewares/error.middleware.js]: ", err);
+      console.error("[src/middlewares/error.middleware.js] [ERROR] ", err);
       console.log("======================================================");
 
       res.status(error.statusCode).json({
@@ -53,6 +84,7 @@ const errorMiddleware = (err, _req, res, next) => {
         message: error.message,
         stack: err.stack,
       });
+      return;
     } else {
       // Production mode
       if (error.isOperational || err.isOperational) {
@@ -61,20 +93,32 @@ const errorMiddleware = (err, _req, res, next) => {
           status: error.status,
           message: error.message,
         });
+        return;
       } else {
         // Programming or unknown errors
         console.log("\n======================================================");
-        console.error("[src/middlewares/error.middleware.js]: ", err);
+        console.error("[src/middlewares/error.middleware.js] [ERROR] ", err);
         console.log("======================================================");
         res.status(500).json({
           success: false,
           status: "error",
           message: "Something went wrong!",
         });
+        return;
       }
     }
   } catch (error) {
+    console.error("Error in error handler: ", error);
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        status: "error",
+        message: "Internal server error",
+      });
+      return;
+    }
     next(error);
+    return;
   }
 };
 

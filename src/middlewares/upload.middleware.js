@@ -1,6 +1,5 @@
-// src/middlewares/upload.middleware.js
+// @ts-check
 
-// the file to save the uploaded files -> inside server/uploads/reports/<reportType>
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -8,8 +7,14 @@ import fs from "fs";
 // Get the server directory (current directory)
 const getRootDir = () => process.cwd();
 
-// File filter function - runs BEFORE destination
-const fileFilter = (req, file, cb) => {
+/**
+ * File filter function - runs BEFORE destination
+ * @param {import("express").Request} _req
+ * @param {Express.Multer.File} file
+ * @param {import("multer").FileFilterCallback} cb
+ * @returns {void}
+ */
+const fileFilter = (_req, file, cb) => {
   const allowedTypes = /pdf|doc|docx|xlsx|xls|ppt|pptx|jpg|jpeg|png/;
   const extname = allowedTypes.test(
     path.extname(file.originalname).toLowerCase(),
@@ -18,41 +23,43 @@ const fileFilter = (req, file, cb) => {
 
   if (mimetype && extname) {
     return cb(null, true);
-  } else {
-    cb(
-      new Error(
-        `File type "${path.extname(file.originalname)}" not allowed. Allowed types: PDF, DOC, DOCX, XLSX, XLS, PPT, PPTX, JPG, JPEG, PNG`,
-      ),
-    );
   }
+
+  return cb(
+    new Error(
+      `File type "${path.extname(file.originalname)}" not allowed. Allowed types: PDF, DOC, DOCX, XLSX, XLS, PPT, PPTX, JPG, JPEG, PNG`,
+    ),
+  );
 };
 
+// Custom multer instance that creates directory only for valid files
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     try {
       // Get report type from request body
-      const reportType = req.body?.reportType || "general";
+      const reportType = req.body?.reportType || "unknown";
 
       // Create path: server/uploads/reports/<reportType>
       const rootDir = getRootDir();
       const uploadDir = path.join(rootDir, "uploads", "reports", reportType);
 
-      // DON'T create directory here - wait until we know file is valid
-      // Directory will be created only when we actually save the file
+      // Create directory if it doesn't exist
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
 
       cb(null, uploadDir);
     } catch (error) {
-      cb(error, null);
+      cb(error instanceof Error ? error : new Error(String(error)), "");
     }
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    const safeFilename = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
-    cb(null, `report-${uniqueSuffix}${path.extname(safeFilename)}`);
+    const safeFilename = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "");
+    cb(null, `report-${uniqueSuffix}-${path.extname(safeFilename)}`);
   },
 });
 
-// Custom multer instance that creates directory only for valid files
 const createMulterInstance = () => {
   const upload = multer({
     storage,
@@ -63,7 +70,13 @@ const createMulterInstance = () => {
   return upload.array("files", 5);
 };
 
-// Middleware wrapper that ensures directory exists only for valid files
+/**
+ * Middleware wrapper that ensures directory exists only for valid files
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ * @returns {void}
+ */
 const uploadReportFiles = (req, res, next) => {
   const upload = createMulterInstance();
 
@@ -74,8 +87,8 @@ const uploadReportFiles = (req, res, next) => {
 
     // At this point, all files have passed the filter
     // Now ensure directory exists for valid files
-    if (req.files && req.files.length > 0) {
-      const reportType = req.body?.reportType || "general";
+    if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+      const reportType = req.body?.reportType || "unknown";
       const uploadDir = path.join(
         process.cwd(),
         "uploads",
@@ -86,21 +99,26 @@ const uploadReportFiles = (req, res, next) => {
       // Create directory if it doesn't exist
       if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir, { recursive: true });
-        console.log(`Created directory for valid files: ${uploadDir}`);
       }
     }
 
-    next();
+    return next();
   });
 };
 
-// Error handling middleware for multer
-const handleMulterError = (err, req, res, next) => {
+/**
+ * Error handling middleware for multer
+ * @param {Error} err
+ * @param {import("express").Request} _req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ */
+const handleMulterError = (err, _req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === "LIMIT_FILE_SIZE") {
       return res.status(400).json({
         success: false,
-        message: "File size too large. Maximum size is 10MB per file",
+        message: "File size too large. Maximum size is 10mb per file",
       });
     }
     if (err.code === "LIMIT_FILE_COUNT") {
@@ -121,11 +139,16 @@ const handleMulterError = (err, req, res, next) => {
       message: err.message || "File upload error",
     });
   }
-  next();
+  return next();
 };
 
-// Middleware to parse multipart form data before authentication
-const parseFormData = (req, res, next) => {
+/**
+ * Middleware to parse multipart form data before authentication
+ * @param {import('express').Request} _req - Express request object
+ * @param {import('express').Response} _res - Express response object
+ * @param {import('express').NextFunction} next - Express next function
+ */
+const parseFormData = (_req, _res, next) => {
   // Multer will handle the parsing
   next();
 };
