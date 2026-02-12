@@ -46,14 +46,14 @@ eventNotificationRouter.post(
 eventNotificationRouter.get(
   "/",
   authenticate,
-  authorize("admin"),
+  authorize("admin", "officer"),
   eventNotificationController.getAllEventNotifications,
 );
 
 eventNotificationRouter.get(
   "/:id",
   authenticate,
-  authorize("admin"),
+  authorize("admin", "officer"),
   eventNotificationController.getEventNotificationById,
 );
 

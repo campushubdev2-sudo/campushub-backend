@@ -1,10 +1,20 @@
+// @ts-check
 import CalendarEntry from "../models/calendar-entry.model.js";
 
 class CalendarEntryRepository {
+  /**
+   * @param {{ eventId: import("mongoose").Types.ObjectId, createdBy: import("mongoose").Types.ObjectId }} payload
+   * @returns {Promise<import("mongoose").Document>}
+   */
   async create(payload) {
     return await CalendarEntry.create(payload);
   }
 
+  /**
+   * @param {string | import("mongoose").Types.ObjectId} userId
+   * @param {string | import("mongoose").Types.ObjectId} eventId
+   * @returns {Promise<Record<string, any> | null>}
+   */
   async findByUserAndEvent(userId, eventId) {
     return await CalendarEntry.findOne({
       createdBy: userId,
@@ -12,20 +22,37 @@ class CalendarEntryRepository {
     }).lean();
   }
 
+  /**
+   * @param {string | import("mongoose").Types.ObjectId} userId
+   * @returns {Promise<Array<Record<string, any>>>}
+   */
   async findByUser(userId) {
     return await CalendarEntry.find({ createdBy: userId })
       .populate("eventId")
       .lean();
   }
 
+  /**
+   * @param {string | import("mongoose").Types.ObjectId} id
+   * @returns {Promise<Record<string, any> | null>}
+   */
   async findById(id) {
     return await CalendarEntry.findById(id).lean();
   }
 
+  /**
+   * @param {string | import("mongoose").Types.ObjectId} eventId
+   * @returns {Promise<import("mongoose").Document | null>}
+   */
   async findByEventId(eventId) {
     return await CalendarEntry.findOne({ eventId });
   }
 
+  /**
+   * @param {string | import("mongoose").Types.ObjectId} id
+   * @param {{ eventId?: import("mongoose").Types.ObjectId, createdBy?: import("mongoose").Types.ObjectId }} updateData
+   * @returns {Promise<Record<string, any> | null>}
+   */
   async updateById(id, updateData) {
     return await CalendarEntry.findByIdAndUpdate(id, updateData, {
       new: true,
@@ -36,26 +63,45 @@ class CalendarEntryRepository {
       .lean();
   }
 
+  /**
+   * @param {string | import("mongoose").Types.ObjectId} id
+   * @returns {Promise<import("mongoose").Document | null>}
+   */
   async deleteById(id) {
     return await CalendarEntry.findByIdAndDelete(id);
   }
 
+  /**
+   * @param {Record<string, any>} query
+   * @param {{ page: number, limit: number, sortBy: string, order: 1 | -1, populate?: Array<string | import("mongoose").PopulateOptions> }} options
+   * @returns {Promise<Array<import("mongoose").Document>>}
+   */
   async findAll(query, options) {
     const { page, limit, sortBy, order, populate } = options;
-
     const skip = (page - 1) * limit;
+    let queryBuilder = CalendarEntry.find(query);
 
-    return CalendarEntry.find(query)
-      .populate(populate)
+    if (populate) {
+      queryBuilder = queryBuilder.populate(populate);
+    }
+
+    return queryBuilder
       .sort({ [sortBy]: order })
       .skip(skip)
       .limit(limit);
   }
 
+  /**
+   * @param {Record<string, any>} query
+   * @returns {Promise<number>}
+   */
   async count(query) {
     return CalendarEntry.countDocuments(query);
   }
 
+  /**
+   * @returns {Promise<Array<{ userId: import("mongoose").Types.ObjectId, username: string, total: number }>>}
+   */
   countByUser() {
     return CalendarEntry.aggregate([
       { $group: { _id: "$createdBy", total: { $sum: 1 } } },
@@ -80,6 +126,9 @@ class CalendarEntryRepository {
     ]);
   }
 
+  /**
+   * @returns {Promise<Array<{ eventId: import("mongoose").Types.ObjectId, title: string, total: number }>>}
+   */
   countByEvent() {
     return CalendarEntry.aggregate([
       { $group: { _id: "$eventId", total: { $sum: 1 } } },
@@ -104,6 +153,9 @@ class CalendarEntryRepository {
     ]);
   }
 
+  /**
+   * @returns {Promise<Array<{ _id: { year: number, month: number }, total: number }>>}
+   */
   countOverTime() {
     return CalendarEntry.aggregate([
       {

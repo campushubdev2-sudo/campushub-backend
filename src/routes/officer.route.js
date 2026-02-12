@@ -30,7 +30,7 @@ officerRouter.post(
 officerRouter.get(
   "/",
   authenticate,
-  authorize("admin"),
+  authorize("admin", "officer"),
   officerController.getOfficers,
 ); // Static
 
@@ -72,7 +72,7 @@ officerRouter.get(
 officerRouter.get(
   "/:id",
   authenticate,
-  authorize("admin"),
+  authorize("admin", "officer"),
   officerController.getOfficerById,
 );
 officerRouter.put(

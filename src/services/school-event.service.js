@@ -56,10 +56,12 @@ class SchoolEventService {
       options: value,
     });
 
-    await auditLogRepository.create({
-      userId: actorId,
-      action: "View Events",
-    });
+    if (actorId) {
+      await auditLogRepository.create({
+        userId: actorId,
+        action: "View Events",
+      });
+    }
 
     return result;
   }

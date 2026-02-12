@@ -32,7 +32,7 @@ class CalendarEntryController {
    */
   getAll = asyncHandler(async (req, res) => {
     const result = await calendarEntryService.getCalendarEntries(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
+      /** @type {AuthenticatedRequest} */ (req).user?.id || null,
       req.query,
     );
 
@@ -49,7 +49,7 @@ class CalendarEntryController {
    */
   getCalendarEntryById = asyncHandler(async (req, res) => {
     const result = await calendarEntryService.getCalendarEntryById(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
+      /** @type {AuthenticatedRequest} */ (req).user?.id || null,
       req.params.id,
     );
 

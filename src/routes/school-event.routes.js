@@ -2,7 +2,11 @@
 import { Router } from "express";
 
 import schoolEventController from "../controllers/school-event.controller.js";
-import { authenticate, authorize } from "../middlewares/auth.middleware.js";
+import {
+  authenticate,
+  authorize,
+  optionalAuthenticate,
+} from "../middlewares/auth.middleware.js";
 import { createRateLimiter } from "../middlewares/rateLimit.middleware.js";
 
 const eventRouter = Router();
@@ -59,8 +63,8 @@ eventRouter.post(
  */
 eventRouter.get(
   "/",
-  authenticate,
-  authorize("admin"),
+  optionalAuthenticate,
+  authorize("admin", "guest", "adviser", "officer"), // for everyone, read only
   schoolEventController.getAllEvents,
 );
 

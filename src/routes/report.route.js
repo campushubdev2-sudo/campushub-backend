@@ -21,7 +21,7 @@ reportRouter.post(
 reportRouter.get(
   "/",
   authenticate,
-  authorize("admin"),
+  authorize("admin", "officer"),
   ReportController.getAllReports,
 );
 
@@ -42,7 +42,7 @@ reportRouter.put(
 reportRouter.get(
   "/:id",
   authenticate,
-  authorize("admin"),
+  authorize("admin", "officer"),
   ReportController.getReportById,
 );
 
