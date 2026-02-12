@@ -30,10 +30,8 @@ class SmsService {
       sendername: this.senderName,
     });
 
-    console.log("api key: ", this.apikey);
     try {
       const { data } = await this.axiosClient.post("/messages", payload);
-      console.log("data is ", data);
       return data;
     } catch (error) {
       console.error(

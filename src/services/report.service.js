@@ -31,7 +31,7 @@ class ReportService {
 
     await auditLogRepository.create({
       userId,
-      action: "report.create",
+      action: "Create Report",
     });
 
     return await ReportRepository.findReportById(report._id);
@@ -90,7 +90,7 @@ class ReportService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "report.list",
+      action: "View Reports",
     });
 
     return { count, data: reports };
@@ -114,7 +114,7 @@ class ReportService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "report.detail",
+      action: "View Report Details",
     });
 
     return report;
@@ -144,7 +144,7 @@ class ReportService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "report.download(s)",
+      action: "Download Reports",
     });
 
     return {
@@ -189,7 +189,7 @@ class ReportService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "report.update-status",
+      action: "Update Report Status",
     });
 
     return updatedReport;
@@ -214,7 +214,7 @@ class ReportService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "report.delete",
+      action: "Delete Report",
     });
 
     return report;

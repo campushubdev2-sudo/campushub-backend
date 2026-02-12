@@ -53,7 +53,7 @@ class OfficerService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "officer.create",
+      action: "Create Officer",
     });
 
     return officer;
@@ -83,7 +83,7 @@ class OfficerService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "officer.delete",
+      action: "Delete Officer",
     });
 
     return officer;
@@ -121,7 +121,7 @@ class OfficerService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "officer.list",
+      action: "View Officers",
     });
 
     return {
@@ -151,7 +151,7 @@ class OfficerService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "officer.detail",
+      action: "View Officer Details",
     });
 
     return officer;
@@ -198,7 +198,7 @@ class OfficerService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "officer.update",
+      action: "Update Officer",
     });
 
     return updatedOfficer;
@@ -223,7 +223,7 @@ class OfficerService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "officer.stats.overview",
+      action: "Officer Statistics Overview",
     });
 
     return {
@@ -252,7 +252,7 @@ class OfficerService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "officer.stats.period",
+      action: "Officer Statistics by Period",
     });
 
     return {
@@ -264,7 +264,7 @@ class OfficerService {
   async getOfficersDetailed(actorId) {
     await auditLogRepository.create({
       userId: actorId,
-      action: "officer.stats.detailed",
+      action: "Detailed Officer Statistics",
     });
 
     return await officerRepository.getOfficersWithUserDetails();
@@ -282,7 +282,7 @@ class OfficerService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "officer.near-term-end",
+      action: "Officers Near Term End",
     });
 
     return {
@@ -305,7 +305,7 @@ class OfficerService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "officer.stats.organization",
+      action: "Officer Statistics by Organization",
     });
 
     return {

@@ -6,10 +6,8 @@ import auditLogRepository from "../repositories/audit-log.repository.js";
 import userRepository from "../repositories/user.repository.js";
 import emailService from "./email.service.js";
 import { AppError } from "../middlewares/error.middleware.js";
-import {
-  sendOtpSchema,
-  verifyOtpSchema,
-} from "../validations/otp.validation.js";
+import { sendOtpSchema } from "../validations/otp.validation.js";
+import { verifyOtpSchema } from "../validations/otp.validation.js";
 
 class OtpService {
   constructor() {
@@ -72,11 +70,6 @@ class OtpService {
         429,
       );
     }
-
-    // await auditLogRepository.create({
-    //   userId: actorId,
-    //   action: "otp.resend",
-    // });
 
     return await this.sendOtp({ email });
   }
@@ -144,7 +137,7 @@ class OtpService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "otp.cleanup",
+      action: "Cleanup OTP Records",
     });
 
     return {
@@ -158,7 +151,7 @@ class OtpService {
   async getOtpStatistics(actorId) {
     await auditLogRepository.create({
       userId: actorId,
-      action: "otp.stats",
+      action: "OTP Statistics",
     });
 
     return otpRepository.getStatistics();

@@ -1,10 +1,25 @@
 // @ts-check
 import asyncHandler from "express-async-handler";
 import officerService from "../services/officer.service.js";
+import { BSBA_OFFICER_POSITIONS } from "../constants/officer-positions.js";
+import { BSHM_OFFICER_POSITIONS } from "../constants/officer-positions.js";
+import { JUNIOR_PHILIPPINE_BSA_OFFICER_POSITIONS } from "../constants/officer-positions.js";
+import { SUPREME_STUDENT_COUNCIL_OFFICER_POSITIONS } from "../constants/officer-positions.js";
+import { BSCRIM_OFFICER_POSITIONS } from "../constants/officer-positions.js";
+import { MODERN_YOUNG_EDUCATORS_OFFICER_POSITIONS } from "../constants/officer-positions.js";
+import { COLLEGE_OF_TEACHER_OFFICER_POSITIONS } from "../constants/officer-positions.js";
+import { ELEM_OFFICER_POSITIONS } from "../constants/officer-positions.js";
+import { SSLG_OFFICER_POSITIONS } from "../constants/officer-positions.js";
+import { YWAV_OFFICER_POSITIONS } from "../constants/officer-positions.js";
+import { JPCS_OFFICER_POSITIONS } from "../constants/officer-positions.js";
 
 /**
  * @typedef {import('express').Request & { user: { id: string } }} AuthenticatedRequest
  * @typedef {import('express').Response} Response
+ */
+
+/**
+ * @typedef {{ positionValue: string, positionLabel: string }} OfficerPositionDTO
  */
 
 class OfficerController {
@@ -166,6 +181,36 @@ class OfficerController {
       success: true,
       message: "Organization officer statistics retrieved successfully",
       data: result,
+    });
+  });
+
+  /** @param {Request} _req @param {Response} res */
+  getAllOfficerPositions = asyncHandler(async (_req, res) => {
+    /** @type {readonly string[]} */
+    const ALL_POSITIONS = [
+      ...BSBA_OFFICER_POSITIONS,
+      ...BSHM_OFFICER_POSITIONS,
+      ...JUNIOR_PHILIPPINE_BSA_OFFICER_POSITIONS,
+      ...SUPREME_STUDENT_COUNCIL_OFFICER_POSITIONS,
+      ...BSCRIM_OFFICER_POSITIONS,
+      ...MODERN_YOUNG_EDUCATORS_OFFICER_POSITIONS,
+      ...COLLEGE_OF_TEACHER_OFFICER_POSITIONS,
+      ...ELEM_OFFICER_POSITIONS,
+      ...SSLG_OFFICER_POSITIONS,
+      ...YWAV_OFFICER_POSITIONS,
+      ...JPCS_OFFICER_POSITIONS,
+    ];
+
+    /** @type {OfficerPositionDTO[]} */
+    const data = Array.from(new Set(ALL_POSITIONS)).map((position) => ({
+      positionValue: position,
+      positionLabel: position,
+    }));
+
+    res.status(200).json({
+      success: true,
+      message: "Officer positions retrieved successfully",
+      data,
     });
   });
 }

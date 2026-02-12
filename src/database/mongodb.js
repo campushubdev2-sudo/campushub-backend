@@ -8,12 +8,25 @@ if (!MONGODB_URI) {
 }
 
 /**
+ * Resolve MongoDB database name based on environment
+ * @returns {string}
+ */
+const resolveDbName = () => {
+  switch (NODE_ENV) {
+    case "production":
+      return "campushub_prod";
+    default:
+      return "campushub_dev";
+  }
+};
+
+/**
  * Connect to MongoDB database
  * @returns {Promise<void>}
  */
 const connectToDatabase = async () => {
   try {
-    await mongoose.connect(MONGODB_URI, { dbName: "campusHubDev" });
+    await mongoose.connect(MONGODB_URI, { dbName: resolveDbName() });
     console.log(`Connected to MongoDB Database in ${NODE_ENV} mode.`);
   } catch (error) {
     console.error("Error connecting to Database:", error.message);

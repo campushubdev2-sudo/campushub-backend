@@ -14,6 +14,12 @@ officerRouter.use(
   }),
 );
 
+officerRouter.get(
+  "/meta/positions",
+  authenticate,
+  officerController.getAllOfficerPositions,
+);
+
 officerRouter.post(
   "/",
   authenticate,

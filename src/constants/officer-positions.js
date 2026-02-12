@@ -40,59 +40,194 @@ const BSBA_OFFICER_POSITIONS = Object.freeze([
   "Representative 4th year HRDM",
 ]);
 
-/** @typedef {typeof BSBA_OFFICER_POSITIONS[number]} BSBAOfficerPosition */
+/** @type {readonly string[]} */
+const BSHM_OFFICER_POSITIONS = Object.freeze([
+  "President",
+  "Vice President",
+  "Secretary",
+  "Assistant Secretary",
+  "Treasurer",
+  "Auditor",
+  "PRO",
+  "Business Manager",
+  "Business Manager",
+  "Documentation",
+  "Documentation",
+  "1st Year Blk 2 Representative",
+  "1st Year Blk 1 Representative",
+  "2nd Year Blk 2 Representative",
+  "2nd Year Blk 1 Representative",
+  "3rd Year Representative",
+  "4th Year Representative",
+]);
 
-/** @type {Readonly<Record<string, BSBAOfficerPosition>>} */
-const BSBA_OFFICER_POSITION_MAP = {
-  PRESIDENT: BSBA_OFFICER_POSITIONS[0],
-  EXECUTIVE_VICE_PRESIDENT: BSBA_OFFICER_POSITIONS[1],
-  GENERAL_SECRETARY: BSBA_OFFICER_POSITIONS[2],
-  SECRETARY_BOARD: BSBA_OFFICER_POSITIONS[3],
+/** @type {readonly string[]} */
+const JUNIOR_PHILIPPINE_BSA_OFFICER_POSITIONS = Object.freeze([
+  "President",
+  "Vice-President for Administration",
+  "Vice-President for Academics",
+  "Vice-President for Culture and Arts",
+  "Vice-President for Games and Sports",
+  "Vice-President for Finance",
+  "Vice-President for Audit",
+  "Vice-President for Communications",
+  "Vice-President for Membership",
+  "Vice-President for Documentation",
+  "General Secretary",
+  "Assistant Secretary",
+  "Representatives - 1st Year",
+  "Representatives - 2nd Year",
+  "Representatives - 3rd Year",
+  "Representatives - 4th Year",
+]);
 
-  VP_FOR_ACADEMICS: BSBA_OFFICER_POSITIONS[4],
-  MEMBER_OF_VP_FOR_ACADEMICS: BSBA_OFFICER_POSITIONS[5],
+/** @type {readonly string[]} */
+const SUPREME_STUDENT_COUNCIL_OFFICER_POSITIONS = Object.freeze([
+  "President",
+  "Vice President",
+  "Secretary",
+  "Board Secretary",
+  "Treasurer",
+  "Auditor",
+  "Business Manager",
+  "SSC Documentary Officer",
+  "SSC Senator",
+  "SSC Representative",
+]);
 
-  VP_FOR_FINANCE: BSBA_OFFICER_POSITIONS[6],
-  MEMBER_OF_VP_FOR_FINANCE: BSBA_OFFICER_POSITIONS[7],
+/** @type {readonly string[]} */
+const BSCRIM_OFFICER_POSITIONS = Object.freeze([
+  "Governor",
+  "Vice Governor Internal",
+  "Vice Governor External",
+  "Minutes Secretary",
+  "File Secretary",
+  "Board Secretary",
+  "Treasurer",
+  "Auditor",
+  "Peace Officer",
+  "Press Relation Officer",
+  "Academic Coordinator",
+  "Sports Coordinator",
+  "Business Manager Internal",
+  "Business Manager External",
+  "1st Year Representative",
+  "2nd Year Representative",
+  "3rd Year Representative",
+  "4th Year Representative",
+]);
 
-  VP_FOR_AUDIT: BSBA_OFFICER_POSITIONS[8],
-  MEMBER_OF_VP_FOR_AUDIT: BSBA_OFFICER_POSITIONS[9],
+/** @type {readonly string[]} */
+const MODERN_YOUNG_EDUCATORS_OFFICER_POSITIONS = Object.freeze([
+  "President",
+  "Vice President for Academics",
+  "Vice President for Communication",
+  "Vice President for Culture and Arts",
+  "Vice President for Sports and Games",
+  "Vice President for Documentation",
+  "Auditor",
+  "Business Manager",
+  "First-Year Representative",
+  "Third-Year Representative",
+  "File Secretary",
+  "Logistics Committee",
+  "Logistics Committee",
+  "Vice President for Finance",
+  "Treasurer",
+  "Vice President for Communication",
+  "Vice President for Culture and Arts",
+  "Vice President for Sports and Games",
+  "Graphic Artist",
+  "Auditor",
+  "Business Manager",
+  "Second-Year Representative",
+  "Fourth-Year Representative",
+  "Board Secretary",
+  "Logistics Committee",
+]);
 
-  VP_FOR_MEMBERSHIP: BSBA_OFFICER_POSITIONS[10],
-  MEMBER_OF_VP_FOR_MEMBERSHIP: BSBA_OFFICER_POSITIONS[11],
+/** @type {readonly string[]} */
+const COLLEGE_OF_TEACHER_OFFICER_POSITIONS = Object.freeze([
+  "First Year Assistant Secretary",
+  "Second Year Assistant Secretary",
+  "Third Year-Assistant Secretary",
+  "BEEd 4th Year- Assistant Secretary",
+  "BSEd 4th Year-Assistant Secretary",
+  "MYES, Advisor",
+  "Dean, College of Teacher Education",
+  "OSAS-Director",
+  "Vice President for Academic Affairs",
+  "EVP/VPA/Principal, Basic Education",
+  "President and Chairman of the Board",
+]);
 
-  VP_FOR_COMMUNICATION: BSBA_OFFICER_POSITIONS[12],
-  MEMBER_OF_VP_FOR_COMMUNICATION: BSBA_OFFICER_POSITIONS[13],
+/** @type {readonly string[]} */
+const ELEM_OFFICER_POSITIONS = Object.freeze([
+  "President",
+  "Vice President",
+  "Secretary",
+  "P.I.O",
+  "Auditor",
+  "Business Manager",
+  "Treasurer",
+  "Grade 1 Rep.",
+  "Grade 2 Rep.",
+  "Grade 3 Rep.",
+  "Grade 4 Rep.",
+  "Grade 5 Rep.",
+  "Grade 6 Rep.",
+]);
 
-  VP_FOR_LOGISTICS: BSBA_OFFICER_POSITIONS[14],
-  MEMBER_OF_VP_FOR_LOGISTICS: BSBA_OFFICER_POSITIONS[15],
+/** @type {readonly string[]} */
+const SSLG_OFFICER_POSITIONS = Object.freeze([
+  "President",
+  "Vice President",
+  "File Secretary",
+  "Board Secretary",
+  "Treasurer",
+  "Auditor",
+  "Business Managers",
+  "P.I.O JHS - Science Class",
+  "P.I.O JHS - Regular Class",
+  "P.I.O SHS",
+  "Peace Officer JHS",
+  "Peace Officer SHS",
+]);
 
-  VP_FOR_GRAPHICS_AND_PUBLICATIONS: BSBA_OFFICER_POSITIONS[16],
-  MEMBER_OF_VP_FOR_GRAPHICS_AND_PUBLICATIONS: BSBA_OFFICER_POSITIONS[17],
+/** @type {readonly string[]} */
+const YWAV_OFFICER_POSITIONS = Object.freeze([
+  "President",
+  "Vice President",
+  "Secretary",
+  "Treasurer",
+  "Auditor",
+  "Public Relation Officer (PRO)",
+]);
 
-  VP_NON_ACADS_SOCIO: BSBA_OFFICER_POSITIONS[18],
-  MEMBER_VP_NON_ACADS_SOCIO: BSBA_OFFICER_POSITIONS[19],
+/** @type {readonly string[]} */
+const JPCS_OFFICER_POSITIONS = Object.freeze([
+  "President",
+  "Vice President",
+  "Secretary",
+  "Asst. Secretary",
+  "Treasurer",
+  "Asst. Treasurer",
+  "Auditor",
+  "Business Managers",
+  "PIO (Academic)",
+  "PIO (Non-Academic)",
+]);
 
-  VP_NON_ACADS_SPORTS: BSBA_OFFICER_POSITIONS[20],
-  MEMBER_VP_NON_ACADS_SPORTS: BSBA_OFFICER_POSITIONS[21],
-
-  REP_1ST_YEAR_FM_A: BSBA_OFFICER_POSITIONS[22],
-  REP_1ST_YEAR_FM_B: BSBA_OFFICER_POSITIONS[23],
-  REP_1ST_YEAR_MM_A: BSBA_OFFICER_POSITIONS[24],
-  REP_1ST_YEAR_MM_B: BSBA_OFFICER_POSITIONS[25],
-  REP_1ST_YEAR_HRDM: BSBA_OFFICER_POSITIONS[26],
-
-  REP_2ND_YEAR_FM_A: BSBA_OFFICER_POSITIONS[27],
-  REP_2ND_YEAR_FM_B: BSBA_OFFICER_POSITIONS[28],
-  REP_2ND_YEAR_MM: BSBA_OFFICER_POSITIONS[29],
-
-  REP_3RD_YEAR_FM: BSBA_OFFICER_POSITIONS[30],
-  REP_3RD_YEAR_MM: BSBA_OFFICER_POSITIONS[31],
-  REP_3RD_YEAR_HRDM: BSBA_OFFICER_POSITIONS[32],
-
-  REP_4TH_YEAR_FM: BSBA_OFFICER_POSITIONS[33],
-  REP_4TH_YEAR_MM: BSBA_OFFICER_POSITIONS[34],
-  REP_4TH_YEAR_HRDM: BSBA_OFFICER_POSITIONS[35],
+export {
+  BSBA_OFFICER_POSITIONS,
+  BSHM_OFFICER_POSITIONS,
+  JUNIOR_PHILIPPINE_BSA_OFFICER_POSITIONS,
+  SUPREME_STUDENT_COUNCIL_OFFICER_POSITIONS,
+  BSCRIM_OFFICER_POSITIONS,
+  MODERN_YOUNG_EDUCATORS_OFFICER_POSITIONS,
+  COLLEGE_OF_TEACHER_OFFICER_POSITIONS,
+  ELEM_OFFICER_POSITIONS,
+  SSLG_OFFICER_POSITIONS,
+  YWAV_OFFICER_POSITIONS,
+  JPCS_OFFICER_POSITIONS,
 };
-
-export { BSBA_OFFICER_POSITIONS, BSBA_OFFICER_POSITION_MAP };

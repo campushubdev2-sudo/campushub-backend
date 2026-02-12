@@ -49,7 +49,7 @@ class CalendarEntryService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "calendar-entry.create",
+      action: "Create Calendar Entry",
     });
 
     return {
@@ -92,7 +92,7 @@ class CalendarEntryService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "calendar-entry.list",
+      action: "View Calendar Entries",
     });
 
     return {
@@ -114,7 +114,7 @@ class CalendarEntryService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "calendar-entry.detail",
+      action: "View Calendar Entry Details",
     });
 
     return entry;
@@ -161,7 +161,7 @@ class CalendarEntryService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "calendar-entry.update",
+      action: "Update Calendar Entry",
     });
 
     return updatedCalendarEntry;
@@ -185,7 +185,7 @@ class CalendarEntryService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "calendar-entry.delete",
+      action: "Delete Calendar Entry",
     });
 
     return deletedEntry;
@@ -194,7 +194,7 @@ class CalendarEntryService {
   async getStats(actorId) {
     await auditLogRepository.create({
       userId: actorId,
-      action: "calendar-entry.stats.overview",
+      action: "Calendar Statistics Overview",
     });
 
     return {

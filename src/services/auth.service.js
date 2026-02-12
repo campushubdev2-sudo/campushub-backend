@@ -40,7 +40,7 @@ class AuthService {
 
     await auditLogRepository.create({
       userId: user._id,
-      action: "auth.sign-in",
+      action: "Sign In",
     });
 
     const token = this.generateToken(user);
@@ -77,7 +77,7 @@ class AuthService {
 
     await auditLogRepository.create({
       userId: user._id,
-      action: "auth.sign-up",
+      action: "Sign Up",
     });
 
     return {
@@ -175,7 +175,7 @@ class AuthService {
 
     await auditLogRepository.create({
       userId: user._id,
-      action: "auth.reset-password",
+      action: "Reset Password",
     });
 
     return true;

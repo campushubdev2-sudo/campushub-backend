@@ -35,7 +35,7 @@ class OrganizationService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "org.create",
+      action: "Create Organization",
     });
 
     return mapOrganization(organization);
@@ -49,7 +49,7 @@ class OrganizationService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "org.get",
+      action: "View Organization Details",
     });
 
     return mapOrganization(organization);
@@ -69,7 +69,7 @@ class OrganizationService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "org.update",
+      action: "Update Organization",
     });
 
     return updatedOrg;
@@ -83,7 +83,7 @@ class OrganizationService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "org.delete",
+      action: "Delete Organization",
     });
 
     return deletedOrg;
@@ -111,7 +111,7 @@ class OrganizationService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "org.list",
+      action: "View Organizations",
     });
 
     return {
@@ -131,7 +131,7 @@ class OrganizationService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "org.stats.overview",
+      action: "Organization Statistics Overview",
     });
 
     return {

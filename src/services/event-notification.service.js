@@ -59,7 +59,7 @@ class EventNotificationService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "notification.create",
+      action: "Create Notification",
     });
 
     return {
@@ -174,7 +174,7 @@ class EventNotificationService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "notification.bulk-create",
+      action: "Create Notifications (Bulk)",
     });
 
     return {
@@ -235,7 +235,7 @@ class EventNotificationService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "notification.list",
+      action: "View Notifications",
     });
 
     // Return sanitized data
@@ -265,7 +265,7 @@ class EventNotificationService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "notification.detail",
+      action: "View Notification Details",
     });
 
     // Return sanitized data
@@ -328,7 +328,7 @@ class EventNotificationService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "notification.update",
+      action: "Update Notification",
     });
 
     return populatedNotification;
@@ -363,7 +363,7 @@ class EventNotificationService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "notification.delete",
+      action: "Delete Notification",
     });
 
     return notificationData;
@@ -372,7 +372,7 @@ class EventNotificationService {
   async getOverallStats(actorId) {
     await auditLogRepository.create({
       userId: actorId,
-      action: "notification.stats.overall",
+      action: "Overall Notification Statistics",
     });
 
     return await eventNotificationRepository.getOverallStats();
@@ -381,7 +381,7 @@ class EventNotificationService {
   async getEventStats(actorId, eventId) {
     await auditLogRepository.create({
       userId: actorId,
-      action: "notification.stats",
+      action: "Notification Statistics",
     });
 
     return await eventNotificationRepository.getEventStats(eventId);

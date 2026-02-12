@@ -1,6 +1,17 @@
+// @ts-check
 import Joi from "joi";
 import { userIdField } from "./fields.js";
 import { BSBA_OFFICER_POSITIONS } from "../constants/officer-positions.js";
+import { BSHM_OFFICER_POSITIONS } from "../constants/officer-positions.js";
+import { JUNIOR_PHILIPPINE_BSA_OFFICER_POSITIONS } from "../constants/officer-positions.js";
+import { SUPREME_STUDENT_COUNCIL_OFFICER_POSITIONS } from "../constants/officer-positions.js";
+import { BSCRIM_OFFICER_POSITIONS } from "../constants/officer-positions.js";
+import { MODERN_YOUNG_EDUCATORS_OFFICER_POSITIONS } from "../constants/officer-positions.js";
+import { COLLEGE_OF_TEACHER_OFFICER_POSITIONS } from "../constants/officer-positions.js";
+import { ELEM_OFFICER_POSITIONS } from "../constants/officer-positions.js";
+import { SSLG_OFFICER_POSITIONS } from "../constants/officer-positions.js";
+import { YWAV_OFFICER_POSITIONS } from "../constants/officer-positions.js";
+import { JPCS_OFFICER_POSITIONS } from "../constants/officer-positions.js";
 
 const createOfficerSchema = Joi.object({
   userId: userIdField.required().messages({
@@ -17,7 +28,19 @@ const createOfficerSchema = Joi.object({
   position: Joi.string()
     .max(50)
     .trim()
-    .valid(...BSBA_OFFICER_POSITIONS)
+    .valid(
+      ...BSBA_OFFICER_POSITIONS,
+      ...BSHM_OFFICER_POSITIONS,
+      ...JUNIOR_PHILIPPINE_BSA_OFFICER_POSITIONS,
+      ...SUPREME_STUDENT_COUNCIL_OFFICER_POSITIONS,
+      ...BSCRIM_OFFICER_POSITIONS,
+      ...MODERN_YOUNG_EDUCATORS_OFFICER_POSITIONS,
+      ...COLLEGE_OF_TEACHER_OFFICER_POSITIONS,
+      ...ELEM_OFFICER_POSITIONS,
+      ...SSLG_OFFICER_POSITIONS,
+      ...YWAV_OFFICER_POSITIONS,
+      ...JPCS_OFFICER_POSITIONS,
+    )
     .required()
     .messages({
       "string.base": `"position" must be a string`,

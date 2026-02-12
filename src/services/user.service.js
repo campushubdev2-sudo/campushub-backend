@@ -41,7 +41,7 @@ class UserService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "user.create",
+      action: "Create User",
     });
 
     return user;
@@ -72,7 +72,7 @@ class UserService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "user.list",
+      action: "View Users",
     });
 
     return userRepository.findAll({
@@ -95,9 +95,8 @@ class UserService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "user.detail",
+      action: "View User Details",
     });
-
 
     return user;
   }
@@ -130,7 +129,7 @@ class UserService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "user.update",
+      action: "Update User",
     });
 
     return updatedUser;
@@ -157,9 +156,8 @@ class UserService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "user.delete",
+      action: "Delete User",
     });
-
 
     return true;
   }
@@ -174,8 +172,8 @@ class UserService {
     ]);
 
     await auditLogRepository.create({
-      userId: actorId, 
-      action: "user.stats.overview",
+      userId: actorId,
+      action: "User Statistics Overview",
     });
 
     return {

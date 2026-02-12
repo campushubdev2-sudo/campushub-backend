@@ -37,7 +37,7 @@ class SchoolEventService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "event.create",
+      action: "Create Event",
     });
 
     return event;
@@ -58,7 +58,7 @@ class SchoolEventService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "event.list",
+      action: "View Events",
     });
 
     return result;
@@ -82,7 +82,7 @@ class SchoolEventService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "event.detail",
+      action: "View Event Details",
     });
 
     return event;
@@ -110,7 +110,7 @@ class SchoolEventService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "event.filter.date-range",
+      action: "Filter Events by Date Range",
     });
 
     return events;
@@ -121,7 +121,7 @@ class SchoolEventService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "event.stats.overview",
+      action: "Event Statistics Overview",
     });
 
     return stats;
@@ -153,7 +153,7 @@ class SchoolEventService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "event.stats.monthly",
+      action: "Monthly Event Statistics",
     });
 
     return {
@@ -167,7 +167,7 @@ class SchoolEventService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "event.stats.venues",
+      action: "Event Statistics by Venue",
     });
 
     return venueStats;
@@ -186,7 +186,7 @@ class SchoolEventService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "event.recent",
+      action: "View Recent Events",
     });
 
     return recentEvents;
@@ -194,8 +194,6 @@ class SchoolEventService {
 
   async updateEvent(actorId, id, payload, options = {}) {
     const { restrictFields = true, allowPastDates = false } = options;
-    console.log("restrictFields: ", restrictFields);
-    console.log("allowPastDates: ", allowPastDates);
 
     if (restrictFields) {
       const allowedUpdates = ["title", "description", "date", "venue"];
@@ -251,7 +249,7 @@ class SchoolEventService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "event.update",
+      action: "Update Event",
     });
 
     return updatedEvent;
@@ -275,7 +273,7 @@ class SchoolEventService {
 
     await auditLogRepository.create({
       userId: actorId,
-      action: "event.delete",
+      action: "Delete Event",
     });
 
     return deletedEvent;
