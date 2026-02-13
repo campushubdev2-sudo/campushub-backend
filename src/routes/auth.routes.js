@@ -8,25 +8,9 @@ const authRouter = Router();
 
 authRouter.get("/profile", authenticate, authController.getProfile);
 
-authRouter.post(
-  "/sign-up",
-  createRateLimiter({ limit: 3, windowMs: 60_000 }),
-  authController.signUp,
-);
-authRouter.post(
-  "/sign-in",
-  createRateLimiter({ limit: 5, windowMs: 60_000 }),
-  authController.signIn,
-);
-authRouter.post(
-  "/reset-password",
-  createRateLimiter({ limit: 3, windowMs: 5 * 60_000 }),
-  authController.resetPassword,
-);
-authRouter.post(
-  "/logout",
-  createRateLimiter({ limit: 10, windowMs: 60_000 }),
-  authController.logOut,
-);
+authRouter.post("/sign-up", createRateLimiter({ limit: 3, windowMs: 60_000 }), authController.signUp);
+authRouter.post("/sign-in", createRateLimiter({ limit: 5, windowMs: 60_000 }), authController.signIn);
+authRouter.post("/reset-password", createRateLimiter({ limit: 3, windowMs: 5 * 60_000 }), authController.resetPassword);
+authRouter.post("/logout", createRateLimiter({ limit: 10, windowMs: 60_000 }), authController.logOut);
 
 export default authRouter;

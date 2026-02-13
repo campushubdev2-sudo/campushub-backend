@@ -1,21 +1,35 @@
+// @ts-check
 import EventNotification from "../models/event-notification.model.js";
 import mongoose from "mongoose";
 
 class EventNotificationRepository {
+  /**
+   * @param {{ eventId: import("mongoose").Types.ObjectId, recipientId: import("mongoose").Types.ObjectId, message: string, status: string}} notificationData
+   * @returns {Promise<import("mongoose").Document>}
+   */
   async create(notificationData) {
     return await EventNotification.create(notificationData);
   }
 
+  /**
+   * @returns {Promise<number>}
+   */
   async count() {
     return await EventNotification.countDocuments();
   }
 
+  /**
+   * @param {string | null} status
+   * @returns {Promise<number>}
+   */
   async countByStatus(status = null) {
     const query = status ? { status } : {};
     return await EventNotification.countDocuments(query);
   }
 
-  // STATS RELATED FUNCTIONS
+  /**
+   * @returns {Promise<{ total: number, read: number, sent: number, today: number, readRate: number, hourlyDistribution: any[]}>}
+   */
   async getOverallStats() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -48,6 +62,10 @@ class EventNotificationRepository {
     };
   }
 
+  /**
+   * @param {import("mongoose").Types.ObjectId} eventId
+   *  @returns {Promise<{ eventId: import("mongoose").Types.ObjectId, total: number, read: number, sent: number, readRate: number }>}
+   */
   async getEventStats(eventId) {
     const stats = await EventNotification.aggregate([
       { $match: { eventId: new mongoose.Types.ObjectId(eventId) } },
@@ -59,7 +77,7 @@ class EventNotificationRepository {
       },
     ]);
 
-    const result = { eventId, total: 0, read: 0, sent: 0 };
+    const result = { eventId, total: 0, read: 0, sent: 0, readRate: 0 };
 
     stats.forEach(({ _id, count }) => {
       result.total += count;
@@ -76,6 +94,10 @@ class EventNotificationRepository {
     return result;
   }
 
+  /**
+   * @param {import("mongoose").Types.ObjectId} userId
+   * @returns {Promise<{ userId: mongoose.Types.ObjectId, total: number, read: number, sent: number, readRate: number, recentNotifications: any[], dailyTrends: any[] }>}
+   */
   async getUserStats(userId) {
     const [data] = await EventNotification.aggregate([
       { $match: { recipientId: new mongoose.Types.ObjectId(userId) } },
@@ -125,11 +147,15 @@ class EventNotificationRepository {
       total: 0,
       read: 0,
       sent: 0,
+      readRate: 0,
       recentNotifications: data.recentActivity,
       dailyTrends: data.dailyTrends,
     };
 
-    data.statusSummary.forEach(({ _id, count }) => {
+    /** @type {{ _id: "read" | "sent" | "failed", count: number }[]} */
+    const statusSummary = data.statusSummary;
+
+    statusSummary.forEach(({ _id, count }) => {
       result.total += count;
       if (_id === "read") {
         result.read = count;
@@ -144,6 +170,10 @@ class EventNotificationRepository {
     return result;
   }
 
+  /**
+   * @param {number} days
+   * @returns {Promise<Array<{ date: string, total: number, read: number, sent: number, readRate: number }>>}
+   */
   async getTimeSeriesStats(days) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
@@ -183,6 +213,10 @@ class EventNotificationRepository {
     ]);
   }
 
+  /**
+   * @param {number} [limit=10]
+   * @returns {Promise<Array<{ eventId: import("mongoose").Types.ObjectId, eventName: string | undefined, total: number, read: number, sent: number, readRate: number }>>}
+   */
   async getTopEvents(limit = 10) {
     return EventNotification.aggregate([
       {
@@ -227,6 +261,9 @@ class EventNotificationRepository {
     ]);
   }
 
+  /**
+   * @returns {Promise<Array<{ month: string, total: number, readWithinHour: number, readWithinDay: number, hourReadRate: number, dayReadRate: number }>>}
+   */
   async getDeliveryPerformance() {
     return EventNotification.aggregate([
       {
@@ -289,16 +326,28 @@ class EventNotificationRepository {
     ]);
   }
 
+  /**
+   * @param {Array<{ eventId: import("mongoose").Types.ObjectId, recipientId: import("mongoose").Types.ObjectId, message: string, status: "sent" | "failed" }>} notificationsData
+   * @returns {Promise<Array<import("mongoose").Document & { eventId: import("mongoose").Types.ObjectId, recipientId: import("mongoose").Types.ObjectId, message: string, sentAt: Date, status: "sent" | "failed" }>>}
+   */
   async createMany(notificationsData) {
     return await EventNotification.insertMany(notificationsData);
   }
 
+  /**
+   * @param {import("mongoose").Types.ObjectId} id
+   * @returns {Promise<import("mongoose").Document | null>}
+   */
   async findById(id) {
     return await EventNotification.findById(id)
       .populate("eventId", "title date venue")
       .populate("recipientId", "username email role");
   }
 
+  /**
+   * @param {{ eventId?: import("mongoose").Types.ObjectId, recipientId?: import("mongoose").Types.ObjectId, status?: "sent" | "failed" | "read", sortBy?: string, order?: "asc" | "desc", fields?: string, limit?: number | string, page?: number | string }} queryParams
+   * @returns {Promise<{ notifications: Array<import("mongoose").Document>, pagination: { total: number, page: number, limit: number, pages: number } }>}
+   */
   async findAllWithFilters(queryParams) {
     const {
       eventId,
@@ -312,6 +361,7 @@ class EventNotificationRepository {
     } = queryParams;
 
     // Build filter object
+    /** @type {Record<string, any>} */
     const filter = {};
 
     if (eventId && mongoose.Types.ObjectId.isValid(eventId)) {
@@ -327,25 +377,29 @@ class EventNotificationRepository {
     }
 
     // Build sort object
+    /** @type {Record<string, 1 | -1>} */
     const sort = {};
     sort[sortBy] = order === "desc" ? -1 : 1;
 
     // Build projection
+    /** @type {Record<string, 1>} */
     const projection = fields
       ? fields.split(",").reduce((acc, field) => {
           acc[field.trim()] = 1;
           return acc;
-        }, {})
+        }, /** @type {Record<string, 1>} */ ({}))
       : {};
 
+    const pageNum = Number(page);
+    const limitNum = Number(limit);
     // Calculate pagination
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
 
     const notifications = await EventNotification.find(filter)
       .select(projection)
       .sort(sort)
       .skip(skip)
-      .limit(parseInt(limit))
+      .limit(limitNum)
       .populate("eventId", "title date venue")
       .populate("recipientId", "username email role");
 
@@ -355,21 +409,34 @@ class EventNotificationRepository {
       notifications,
       pagination: {
         total,
-        page: parseInt(page),
-        limit: parseInt(limit),
-        pages: Math.ceil(total / parseInt(limit)),
+        page: pageNum,
+        limit: limitNum,
+        pages: Math.ceil(total / limitNum),
       },
     };
   }
 
+  /**
+   * @param {import("mongoose").Types.ObjectId} recipientId
+   * @returns {Promise<Array<Record<string, any>>>}
+   */
   async findByRecipient(recipientId) {
     return await EventNotification.find({ recipientId }).lean();
   }
 
+  /**
+   * @param {import("mongoose").Types.ObjectId} eventId
+   * @returns {Promise<import("mongoose").Document[]>}
+   */
   async findByEvent(eventId) {
     return await EventNotification.find({ eventId }).populate("recipientId");
   }
 
+  /**
+   * @param {import("mongoose").Types.ObjectId} id
+   * @param {{ message?: string, status?: "sent" | "failed"}} updateData
+   * @returns {Promise<import("mongoose").Document | null>}
+   */
   async updateById(id, updateData) {
     return await EventNotification.findByIdAndUpdate(id, updateData, {
       new: true,
@@ -377,6 +444,10 @@ class EventNotificationRepository {
     });
   }
 
+  /**
+   * @param {import("mongoose").Types.ObjectId} id
+   * @returns {Promise<import("mongoose").Document | null>}
+   */
   async findByIdWithEvent(id) {
     return await EventNotification.findById(id).populate(
       "eventId",
@@ -384,20 +455,38 @@ class EventNotificationRepository {
     );
   }
 
+  /**
+   * @param {import("mongoose").Types.ObjectId} id
+   * @returns {Promise<import("mongoose").Document | null>}
+   */
   async findByIdWithEventAndRecipient(id) {
     return await EventNotification.findById(id)
       .populate("eventId", "title date venue")
       .populate("recipientId", "username email role");
   }
 
+  /**
+   * @param {import("mongoose").Types.ObjectId} id
+   * @returns {Promise<import("mongoose").HydratedDocument<import("mongoose").InferSchemaType<typeof EventNotification.schema>> | null>}
+   */
   async deleteById(id) {
     return await EventNotification.findByIdAndDelete(id);
   }
 
+  /**
+   * @param {import("mongoose").Types.ObjectId} eventId
+   * @param {import("mongoose").Types.ObjectId} recipientId
+   * @returns {Promise<import("mongoose").HydratedDocument<import("mongoose").InferSchemaType<typeof EventNotification.schema>> | null>}
+   */
   async findByEventAndRecipient(eventId, recipientId) {
     return await EventNotification.findOne({ eventId, recipientId });
   }
 
+  /**
+   * @param {import("mongoose").Types.ObjectId} id
+   * @param {"sent" | "failed" | "read"} status
+   * @returns {Promise<import("mongoose").HydratedDocument<import("mongoose").InferSchemaType<typeof EventNotification.schema>> | null>}
+   */
   async updateStatus(id, status) {
     return await EventNotification.findByIdAndUpdate(
       id,
@@ -406,13 +495,28 @@ class EventNotificationRepository {
     );
   }
 
+  /**
+   * @param {import("mongoose").Types.ObjectId} id
+   * @returns {Promise<import("mongoose").HydratedDocument<import("mongoose").InferSchemaType<typeof EventNotification.schema>> | null>}
+   */
   async delete(id) {
     return await EventNotification.findByIdAndDelete(id);
   }
 
+  /**
+   * @param {import("mongoose").Types.ObjectId[]} ids
+   * @param {"sent" | "failed" | "read"} status
+   * @returns {Promise<import("mongoose").UpdateResult>}
+   */
   async updateManyStatus(ids = [], status) {
     if (!ids.length) {
-      return { matchedCount: 0, modifiedCount: 0 };
+      return {
+        acknowledged: true,
+        matchedCount: 0,
+        modifiedCount: 0,
+        upsertedCount: 0,
+        upsertedId: null,
+      };
     }
 
     return await EventNotification.updateMany(
@@ -420,7 +524,7 @@ class EventNotificationRepository {
       {
         $set: {
           status,
-          sentAt: status === "sent" ? new Date() : undefined,
+          sentAt: status === "sent" ? new Date() : {},
         },
       },
     );
