@@ -13,7 +13,7 @@ import auditLogRepository from "../repositories/audit-log.repository.js";
 
 /**
  * @typedef {Object} AuthUser
- * @property {string} id
+ * @property {import("mongoose").Types.ObjectId} id
  * @property {string} username
  * @property {string} email
  * @property {string} role

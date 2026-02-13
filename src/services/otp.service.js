@@ -62,13 +62,8 @@ class OtpService {
     const existingOtp = await otpRepository.findLatestUnverifiedByEmail(email);
 
     if (existingOtp && existingOtp.expiresAt > new Date()) {
-      const remainingTime = Math.ceil(
-        (existingOtp.expiresAt - Date.now()) / 1000 / 60,
-      );
-      throw new AppError(
-        `Current OTP is still valid. Please check your email or wait ${remainingTime} minute(s).`,
-        429,
-      );
+      const remainingTime = Math.ceil((existingOtp.expiresAt - Date.now()) / 1000 / 60);
+      throw new AppError(`Current OTP is still valid. Please check your email or wait ${remainingTime} minute(s).`, 429);
     }
 
     return await this.sendOtp({ email });
@@ -92,9 +87,7 @@ class OtpService {
         throw new AppError("Invalid OTP", 400);
       }
 
-      const updatedOtp = await otpRepository.incrementOtpAttempts(
-        latestOtp._id,
-      );
+      const updatedOtp = await otpRepository.incrementOtpAttempts(latestOtp._id);
 
       if (updatedOtp.verificationAttempts >= this.MAX_VERIFICATION_ATTEMPTS) {
         await otpRepository.deleteOtpsByEmail(email);
@@ -120,7 +113,7 @@ class OtpService {
     await otpRepository.markOtpVerified(otpDoc._id);
 
     // clean up other OTPs for same email
-    await otpRepository.deleteOtpsByEmail(email);
+    // await otpRepository.deleteOtpsByEmail(email);
 
     return {
       email,
