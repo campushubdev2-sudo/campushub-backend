@@ -17,9 +17,9 @@ const otpField = Joi.string().length(6).pattern(/^\d+$/).required().messages({
   "any.required": "OTP is required.",
 });
 
-const passwordField = Joi.string().max(128).messages({
-  "string.min": "Password must be at least 8 characters",
+const passwordField = Joi.string().trim().max(128).messages({
   "string.max": "Password cannot exceed 128 characters",
+  "string.empty": "Password is not allowed to be empty",
 });
 
 const userIdField = Joi.string().hex().length(24).optional().messages({
@@ -30,30 +30,19 @@ const userIdField = Joi.string().hex().length(24).optional().messages({
 const phoneNumberField = Joi.string()
   .pattern(/^\+639\d{9}$/)
   .length(13)
+  .trim()
   .messages({
-    "string.pattern.base":
-      "Phone number must be in E.164 format (e.g., +639123456789)",
+    "string.pattern.base": "Phone number must be in E.164 format (e.g., +639123456789)",
+    "string.empty": "Phone number cannot be empty",
   });
 
-const roleField = Joi.string()
-  .valid("admin", "adviser", "officer", "student")
-  .messages({
-    "any.only": "Role must be one of: admin, adviser, officer, student",
-  });
-
-const usernameField = Joi.string().trim().min(3).max(50).messages({
-  "string.base": "Username must be a string",
-  "string.empty": "Username cannot be empty",
-  "string.min": "Username must be at least 3 characters",
-  "string.max": "Username cannot exceed 50 characters",
+const roleField = Joi.string().trim().valid("admin", "adviser", "officer", "student").messages({
+  "any.only": "Role must be one of: admin, adviser, officer, student",
 });
 
-export {
-  emailField,
-  otpField,
-  passwordField,
-  phoneNumberField,
-  roleField,
-  usernameField,
-  userIdField,
-};
+const usernameField = Joi.string().trim().messages({
+  "string.base": "Username must be a string",
+  "string.empty": "Username cannot be empty",
+});
+
+export { emailField, otpField, passwordField, phoneNumberField, roleField, usernameField, userIdField };

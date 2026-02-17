@@ -4,10 +4,13 @@ import { createReportSchema } from "../validations/report.validation.js";
 import { downloadReportFilesSchema } from "../validations/report.validation.js";
 import { updateReportStatusSchema } from "../validations/report.validation.js";
 import { deleteReportSchema } from "../validations/report.validation.js";
+import { getAllReportsQuerySchema } from "../validations/report.validation.js";
 import { AppError } from "../middlewares/error.middleware.js";
 import mongoose from "mongoose";
 import auditLogRepository from "../repositories/audit-log.repository.js";
 import smsService from "./sms.service.js";
+import path from "path";
+import fs from "fs/promises";
 
 class ReportService {
   async createReport(payload, userId) {
@@ -38,15 +41,13 @@ class ReportService {
   }
 
   async getAllReports(actorId, query = {}) {
-    const {
-      page = 1,
-      limit = 25,
-      orgId,
-      reportType,
-      submittedBy,
-      sortBy = "submittedDate",
-      sortOrder = "desc",
-    } = query;
+    const { value, error } = getAllReportsQuerySchema.validate(query);
+    if (error) {
+      const message = error.details[0].message.replace(/"/g, "");
+      throw new AppError(message, 400);
+    }
+
+    const { page, limit, orgId, reportType, submittedBy, sortBy, sortOrder } = value;
 
     // Build filter
     const filter = {};
@@ -60,33 +61,15 @@ class ReportService {
       filter.submittedBy = submittedBy;
     }
 
-    // Validate numeric params
-    const parsedPage = parseInt(page, 10);
-    const parsedLimit = parseInt(limit, 10);
-    if (Number.isNaN(parsedPage) || parsedPage < 1) {
-      throw new AppError("Invalid page parameter", 400);
-    }
-    if (Number.isNaN(parsedLimit) || parsedLimit < 1) {
-      throw new AppError("Invalid limit parameter", 400);
-    }
-
     // Build sort
-    const order = sortOrder === "asc" ? 1 : -1;
-    const sort = { [sortBy]: order };
+    const sort = { [sortBy]: sortOrder === "asc" ? 1 : -1 };
 
-    // Populate org and submitter basic fields
     const populate = [
       { path: "orgId", select: "orgName adviserId" },
       { path: "submittedBy", select: "username email role" },
     ];
 
-    const { count, reports } = await ReportRepository.findAll({
-      filter,
-      page: parsedPage,
-      limit: parsedLimit,
-      sort,
-      populate,
-    });
+    const { count, reports } = await ReportRepository.findAll({ filter, page, limit, sort, populate });
 
     await auditLogRepository.create({
       userId: actorId,
@@ -98,7 +81,7 @@ class ReportService {
 
   async getReportById(actorId, reportId) {
     if (!reportId || !mongoose.Types.ObjectId.isValid(reportId)) {
-      throw new AppError("Invalid report id", 400);
+      throw new AppError("  ", 400);
     }
 
     const populate = [
@@ -126,7 +109,7 @@ class ReportService {
       id: reportId,
     });
     if (error) {
-      const message = error.details.map((detail) => detail.message);
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -157,7 +140,7 @@ class ReportService {
     const { error, value } = updateReportStatusSchema.validate(payload);
 
     if (error) {
-      const message = error.details.map((d) => d.message);
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -182,7 +165,7 @@ class ReportService {
     }
 
     if (report.status === "pending" && status === "approved") {
-      await smsService.sendSMS({ to, message }); // auto-generated or user defined?
+      await smsService.sendSMS({ to, message });
     }
 
     const updatedReport = await ReportRepository.updateStatusById(id, status);
@@ -199,7 +182,7 @@ class ReportService {
     const { error, value } = deleteReportSchema.validate(payload);
 
     if (error) {
-      const message = error.details.map((d) => d.message);
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -208,6 +191,18 @@ class ReportService {
     const report = await ReportRepository.findById(id);
     if (!report) {
       throw new AppError("Report not found", 404);
+    }
+
+    if (Array.isArray(report.filePaths)) {
+      for (const relativePath of report.filePaths) {
+        const absolutePath = path.join(process.cwd(), relativePath);
+
+        try {
+          await fs.unlink(absolutePath);
+        } catch (error) {
+          console.error("Failed to delete file: ", absolutePath);
+        }
+      }
     }
 
     await ReportRepository.deleteById(id);

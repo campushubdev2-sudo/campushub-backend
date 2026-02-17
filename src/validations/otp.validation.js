@@ -8,11 +8,18 @@ const resetPasswordSchema = Joi.object({
     "any.required": "Email is required",
   }),
   otp: otpField.required(),
-  newPassword: Joi.string().min(8).required().messages({
-    "string.min": "Your new password must be at least 8 characters long.",
-    "string.empty": "New password cannot be empty.",
-    "any.required": "A new password is required.",
-  }),
+  newPassword: Joi.string()
+    .min(8)
+    .max(128)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#^()_\-+=]).+$/)
+    .required()
+    .messages({
+      "string.empty": "New password cannot be empty.",
+      "any.required": "A new password is required.",
+      "string.min": "Your new password must be at least 8 characters long.",
+      "string.max": "Your new password cannot exceed 128 characters.",
+      "string.pattern.base": "Password must include uppercase, lowercase, number, and special character",
+    }),
 }).options({
   abortEarly: false,
   stripUnknown: true,

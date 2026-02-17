@@ -12,10 +12,7 @@ class OrganizationController {
    * @param {Response} res
    */
   createOrganization = asyncHandler(async (req, res) => {
-    const result = await organizationService.createOrganization(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      req.body,
-    );
+    const result = await organizationService.createOrganization(/** @type {AuthenticatedRequest} */ (req).user.id, req.body);
 
     res.status(201).json({
       success: true,
@@ -28,10 +25,7 @@ class OrganizationController {
    * @param {Response} res
    */
   getOrganizations = asyncHandler(async (req, res) => {
-    const result = await organizationService.getAllOrganizations(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      req.query,
-    );
+    const result = await organizationService.getAllOrganizations(/** @type {AuthenticatedRequest} */ (req).user.id, req.query);
 
     res.status(200).json({
       success: true,
@@ -45,10 +39,7 @@ class OrganizationController {
    * @param {Response} res
    */
   getOrganization = asyncHandler(async (req, res) => {
-    const result = await organizationService.getOrganization(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      req.params.id,
-    );
+    const result = await organizationService.getOrganization(/** @type {AuthenticatedRequest} */ (req).user.id, req.params.id);
 
     res.status(200).json({
       success: true,
@@ -61,11 +52,7 @@ class OrganizationController {
    * @param {Response} res
    */
   updateOrganization = asyncHandler(async (req, res) => {
-    const result = await organizationService.updateOrganization(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      req.params.id,
-      req.body,
-    );
+    const result = await organizationService.updateOrganization(/** @type {AuthenticatedRequest} */ (req).user.id, req.params.id, req.body);
 
     res.status(200).json({
       success: true,
@@ -78,10 +65,7 @@ class OrganizationController {
    * @param {Response} res
    */
   deleteOrganization = asyncHandler(async (req, res) => {
-    await organizationService.deleteOrganization(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      req.params.id,
-    );
+    await organizationService.deleteOrganization(/** @type {AuthenticatedRequest} */ (req).user.id, req.params.id);
 
     res.status(200).json({
       success: true,
@@ -94,9 +78,7 @@ class OrganizationController {
    * @param {Response} res
    */
   getStats = asyncHandler(async (req, res) => {
-    const result = await organizationService.getGeneralStats(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-    );
+    const result = await organizationService.getGeneralStats(/** @type {AuthenticatedRequest} */ (req).user.id);
 
     res.status(200).json({
       success: true,

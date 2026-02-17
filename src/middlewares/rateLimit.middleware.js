@@ -25,6 +25,7 @@ const defaultKeyGenerator = (req) => req.user?.id || ipKeyGenerator(req.ip || ""
 const defaultHandler = (_req, res) => {
   res.status(429).json({
     success: false,
+    status: "fail",
     message: "Too many requests. Please try again later.",
   });
 };

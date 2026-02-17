@@ -40,10 +40,7 @@ class ReportController {
       });
 
       // Combine with any file URLs sent in body
-      const allFilePaths = [
-        ...uploadedFilePaths,
-        ...(req.body.filePaths || []),
-      ];
+      const allFilePaths = [...uploadedFilePaths, ...(req.body.filePaths || [])];
 
       const reportsData = {
         orgId: req.body.orgId,
@@ -51,10 +48,7 @@ class ReportController {
         filePaths: allFilePaths,
       };
 
-      const result = await reportService.createReport(
-        reportsData,
-        /** @type {ReportRequest} */ (req).user.id,
-      );
+      const result = await reportService.createReport(reportsData, /** @type {ReportRequest} */ (req).user.id);
 
       res.status(201).json({
         success: true,
@@ -80,10 +74,7 @@ class ReportController {
 
   /** @param {Response} res */
   getAllReports = asyncHandler(async (req, res) => {
-    const result = await reportService.getAllReports(
-      /** @type {ReportRequest} */ (req).user.id,
-      req.query,
-    );
+    const result = await reportService.getAllReports(/** @type {ReportRequest} */ (req).user.id, req.query);
 
     res.status(200).json({
       success: true,
@@ -96,10 +87,7 @@ class ReportController {
   getReportById = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
-    const report = await reportService.getReportById(
-      /** @type {ReportRequest} */ (req).user.id,
-      id,
-    );
+    const report = await reportService.getReportById(/** @type {ReportRequest} */ (req).user.id, id);
 
     res.status(200).json({
       success: true,
@@ -109,18 +97,12 @@ class ReportController {
 
   /** @param {Response} res */
   downloadReportFiles = asyncHandler(async (req, res) => {
-    const result = await reportService.downloadFiles(
-      /** @type {ReportRequest} */ (req).user.id,
-      req.params.id,
-    );
+    const result = await reportService.downloadFiles(/** @type {ReportRequest} */ (req).user.id, req.params.id);
 
     // MULTIPLE FILES → ZIP
     if (result.filePaths.length > 1) {
       res.setHeader("Content-Type", "application/zip");
-      res.setHeader(
-        "Content-Disposition",
-        `attachment; filename=${result.reportType}-reports.zip`,
-      );
+      res.setHeader("Content-Disposition", `attachment; filename=${result.reportType}-reports.zip`);
 
       const archive = archiver("zip", { zlib: { level: 9 } });
 
@@ -156,10 +138,7 @@ class ReportController {
       ...(req.body.message && { message: req.body.message }),
     };
 
-    const result = await reportService.updateReportStatus(
-      /** @type {ReportRequest} **/ (req).user.id,
-      payload,
-    );
+    const result = await reportService.updateReportStatus(/** @type {ReportRequest} **/ (req).user.id, payload);
 
     res.status(200).json({
       success: true,
@@ -170,12 +149,9 @@ class ReportController {
 
   /** @param {Response} res */
   deleteReportById = asyncHandler(async (req, res) => {
-    const result = await reportService.deleteReportById(
-      /** @type {ReportRequest} */ (req).user.id,
-      {
-        id: req.params.id,
-      },
-    );
+    const result = await reportService.deleteReportById(/** @type {ReportRequest} */ (req).user.id, {
+      id: req.params.id,
+    });
 
     res.status(200).json({
       success: true,

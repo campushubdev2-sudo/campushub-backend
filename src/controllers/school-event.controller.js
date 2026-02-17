@@ -11,10 +11,7 @@ import schoolEventService from "../services/school-event.service.js";
 class SchoolEventController {
   /** @param {Response} res */
   createNewEvent = asyncHandler(async (req, res) => {
-    const newEvent = await schoolEventService.createSchoolEvent(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      req.body,
-    );
+    const newEvent = await schoolEventService.createSchoolEvent(/** @type {AuthenticatedRequest} */ (req).user.id, req.body);
 
     res.status(201).json({
       success: true,
@@ -25,10 +22,7 @@ class SchoolEventController {
 
   /** @param {Response} res */
   getAllEvents = asyncHandler(async (req, res) => {
-    const result = await schoolEventService.getAllEvents(
-      /** @type {AuthenticatedRequest} */ (req).user?.id || null,
-      req.query,
-    );
+    const result = await schoolEventService.getAllEvents(/** @type {AuthenticatedRequest} */ (req).user?.id || null, req.query);
 
     res.status(200).json({
       success: true,
@@ -45,10 +39,7 @@ class SchoolEventController {
 
   /** @param {Response} res */
   getSchoolEventById = asyncHandler(async (req, res) => {
-    const result = await schoolEventService.getSchoolEventById(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      req.params,
-    );
+    const result = await schoolEventService.getSchoolEventById(/** @type {AuthenticatedRequest} */ (req).user.id, req.params);
 
     res.status(200).json({
       success: true,
@@ -59,10 +50,7 @@ class SchoolEventController {
 
   /** @param {Response} res */
   filterEvents = asyncHandler(async (req, res) => {
-    const result = await schoolEventService.filterEventsByDate(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      req.query,
-    );
+    const result = await schoolEventService.filterEventsByDate(/** @type {AuthenticatedRequest} */ (req).user.id, req.query);
 
     res.status(200).json({
       success: true,
@@ -74,9 +62,7 @@ class SchoolEventController {
 
   /** @param {Response} res */
   getStats = asyncHandler(async (req, res) => {
-    const stats = await schoolEventService.getEventStats(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-    );
+    const stats = await schoolEventService.getEventStats(/** @type {AuthenticatedRequest} */ (req).user.id);
 
     res.status(200).json({
       success: true,
@@ -89,12 +75,7 @@ class SchoolEventController {
   getMonthlyStats = asyncHandler(async (req, res) => {
     const { year } = req.query;
 
-    const result = await schoolEventService.getMonthlyEventCount(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      {
-        year,
-      },
-    );
+    const result = await schoolEventService.getMonthlyEventCount(/** @type {AuthenticatedRequest} */ (req).user.id, { year });
 
     res.status(200).json({
       success: true,
@@ -105,9 +86,7 @@ class SchoolEventController {
 
   /** @param {Response} res */
   getVenueStats = asyncHandler(async (req, res) => {
-    const venueStats = await schoolEventService.getVenueStats(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-    );
+    const venueStats = await schoolEventService.getVenueStats(/** @type {AuthenticatedRequest} */ (req).user.id);
 
     res.status(200).json({
       success: true,
@@ -121,10 +100,7 @@ class SchoolEventController {
   getRecentEvents = asyncHandler(async (req, res) => {
     const { limit } = req.query;
 
-    const result = await schoolEventService.getRecentEvents(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      { limit },
-    );
+    const result = await schoolEventService.getRecentEvents(/** @type {AuthenticatedRequest} */ (req).user.id, { limit });
 
     res.status(200).json({
       success: true,
@@ -139,11 +115,7 @@ class SchoolEventController {
     const { id } = req.params;
     const updateData = req.body;
 
-    const result = await schoolEventService.updateEvent(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      id,
-      updateData,
-    );
+    const result = await schoolEventService.updateEvent(/** @type {AuthenticatedRequest} */ (req).user.id, id, updateData);
 
     res.status(200).json({
       success: true,
@@ -155,10 +127,7 @@ class SchoolEventController {
   /** @param {Response} res */
   deleteSchoolEvent = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const result = await schoolEventService.deleteSchoolEvent(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      id,
-    );
+    const result = await schoolEventService.deleteSchoolEvent(/** @type {AuthenticatedRequest} */ (req).user.id, id);
 
     res.status(200).json({
       success: true,

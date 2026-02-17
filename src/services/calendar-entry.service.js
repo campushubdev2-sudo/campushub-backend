@@ -1,5 +1,6 @@
 import calendarEntryRepository from "../repositories/calendar-entry.repository.js";
 import { createCalendarEntrySchema } from "../validations/calendar-entry.validation.js";
+import { getCalendarEntryByIdSchema } from "../validations/calendar-entry.validation.js";
 import { getCalendarEntriesSchema } from "../validations/calendar-entry.validation.js";
 import { deleteCalendarEntrySchema } from "../validations/calendar-entry.validation.js";
 import { updateCalendarEntrySchema } from "../validations/calendar-entry.validation.js";
@@ -13,8 +14,8 @@ class CalendarEntryService {
     const { error, value } = createCalendarEntrySchema.validate(payload);
 
     if (error) {
-      const messages = error.details.map((detail) => detail.message);
-      throw new AppError(messages.join(", "), 400);
+      const message = error.details[0].message.replace(/"/g, "");
+      throw new AppError(message, 400);
     }
 
     const { eventId, createdBy } = value;
@@ -29,10 +30,7 @@ class CalendarEntryService {
       throw new AppError("Event not found", 404);
     }
 
-    const existingEntry = await calendarEntryRepository.findByUserAndEvent(
-      createdBy,
-      eventId,
-    );
+    const existingEntry = await calendarEntryRepository.findByUserAndEvent(createdBy, eventId);
     if (existingEntry) {
       throw new AppError("Calendar entry already exists for this event", 409);
     }
@@ -42,10 +40,7 @@ class CalendarEntryService {
       createdBy,
     });
     // Get the populated entry for response
-    const populatedEntry = await calendarEntryRepository.findByUserAndEvent(
-      createdBy,
-      eventId,
-    );
+    const populatedEntry = await calendarEntryRepository.findByUserAndEvent(createdBy, eventId);
 
     await auditLogRepository.create({
       userId: actorId,
@@ -62,7 +57,7 @@ class CalendarEntryService {
     const { error, value } = getCalendarEntriesSchema.validate(payload);
 
     if (error) {
-      const message = error.details.map((d) => d.message).join(", ");
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -82,10 +77,7 @@ class CalendarEntryService {
         limit,
         sortBy,
         order: order === "asc" ? 1 : -1,
-        populate: [
-          { path: "eventId" },
-          { path: "createdBy", select: "username role email" },
-        ],
+        populate: [{ path: "eventId" }, { path: "createdBy", select: "username role email" }],
       }),
       calendarEntryRepository.count(query),
     ]);
@@ -109,7 +101,14 @@ class CalendarEntryService {
   }
 
   async getCalendarEntryById(actorId, id) {
-    const entry = await calendarEntryRepository.findById(id);
+    const { error, value } = getCalendarEntryByIdSchema.validate({ id });
+    if (error) {
+      const message = error.details[0].message.replace(/"/g, "");
+      throw new AppError(message, 400);
+    }
+
+    const { id: validatedId } = value;
+    const entry = await calendarEntryRepository.findById(validatedId);
     if (!entry) {
       throw new AppError("Calendar entry not found", 404);
     }
@@ -128,8 +127,8 @@ class CalendarEntryService {
     const { error, value } = updateCalendarEntrySchema.validate(payload);
 
     if (error) {
-      const messages = error.details.map((detail) => detail.message);
-      throw new AppError(messages.join(", "), 400);
+      const message = error.details[0].message.replace(/"/g, "");
+      throw new AppError(message, 400);
     }
 
     const { eventId, createdBy } = value;
@@ -149,12 +148,8 @@ class CalendarEntryService {
       throw new AppError("User not found", 404);
     }
 
-    const existingEntryWithEvent =
-      await calendarEntryRepository.findByEventId(eventId);
-    if (
-      existingEntryWithEvent &&
-      existingEntryWithEvent._id.toString() !== id
-    ) {
+    const existingEntryWithEvent = await calendarEntryRepository.findByEventId(eventId);
+    if (existingEntryWithEvent && existingEntryWithEvent._id.toString() !== id) {
       throw new AppError("Event already exists in another calendar entry", 409);
     }
 
@@ -174,7 +169,7 @@ class CalendarEntryService {
   async deleteCalendarEntry(actorId, payload) {
     const { error, value } = deleteCalendarEntrySchema.validate(payload);
     if (error) {
-      const message = error.details.map((detail) => detail.message).join(", ");
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 

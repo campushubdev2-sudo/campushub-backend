@@ -10,10 +10,7 @@ class EventNotificationController {
    * @param {Response} res
    */
   createNotification = asyncHandler(async (req, res) => {
-    const result = await eventNotificationService.createEventNotification(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      req.body,
-    );
+    const result = await eventNotificationService.createEventNotification(/** @type {AuthenticatedRequest} */ (req).user.id, req.body);
 
     res.status(201).json({
       success: true,
@@ -26,10 +23,7 @@ class EventNotificationController {
    * @param {Response} res
    */
   createBulkNotifications = asyncHandler(async (req, res) => {
-    const result = await eventNotificationService.createBulkEventNotifications(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      req.body,
-    );
+    const result = await eventNotificationService.createBulkEventNotifications(/** @type {AuthenticatedRequest} */ (req).user.id, req.body);
 
     res.status(201).json({
       success: true,
@@ -42,10 +36,7 @@ class EventNotificationController {
    * @param {Response} res
    */
   getAllEventNotifications = asyncHandler(async (req, res) => {
-    const result = await eventNotificationService.getAllEventNotifications(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      req.query,
-    );
+    const result = await eventNotificationService.getAllEventNotifications(/** @type {AuthenticatedRequest} */ (req).user.id, req.query);
 
     res.status(200).json({
       success: true,
@@ -62,10 +53,7 @@ class EventNotificationController {
    */
   getEventNotificationById = asyncHandler(async (req, res) => {
     const notificationId = req.params.id;
-    const result = await eventNotificationService.getEventNotificationById(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      notificationId,
-    );
+    const result = await eventNotificationService.getEventNotificationById(/** @type {AuthenticatedRequest} */ (req).user.id, notificationId);
 
     res.status(200).json({
       success: true,
@@ -78,13 +66,10 @@ class EventNotificationController {
    * @param {Response} res
    */
   updateEventNotification = asyncHandler(async (req, res) => {
-    const result = await eventNotificationService.updateEventNotification(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      {
-        id: req.params.id,
-        updateData: req.body,
-      },
-    );
+    const result = await eventNotificationService.updateEventNotification(/** @type {AuthenticatedRequest} */ (req).user.id, {
+      id: req.params.id,
+      updateData: req.body,
+    });
 
     res.status(200).json({
       statusCode: 200,
@@ -98,12 +83,9 @@ class EventNotificationController {
    * @param {Response} res
    */
   deleteEventNotification = asyncHandler(async (req, res) => {
-    const result = await eventNotificationService.deleteEventNotification(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      {
-        id: req.params.id,
-      },
-    );
+    const result = await eventNotificationService.deleteEventNotification(/** @type {AuthenticatedRequest} */ (req).user.id, {
+      id: req.params.id,
+    });
 
     res.status(200).json({
       statusCode: 200,
@@ -117,9 +99,7 @@ class EventNotificationController {
    * @param {Response} res
    */
   getOverallStats = asyncHandler(async (req, res) => {
-    const result = await eventNotificationService.getOverallStats(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-    );
+    const result = await eventNotificationService.getOverallStats(/** @type {AuthenticatedRequest} */ (req).user.id);
 
     res.status(200).json({
       success: true,
@@ -132,10 +112,7 @@ class EventNotificationController {
    * @param {Response} res
    */
   getEventStats = asyncHandler(async (req, res) => {
-    const result = await eventNotificationService.getEventStats(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      req.params.id,
-    );
+    const result = await eventNotificationService.getEventStats(/** @type {AuthenticatedRequest} */ (req).user.id, req.params.id);
 
     res.status(200).json({
       success: true,

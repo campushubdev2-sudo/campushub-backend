@@ -1,6 +1,6 @@
 import organizationRepository from "../repositories/organization.repository.js";
 import userRepository from "../repositories/user.repository.js";
-import { createOrganizationSchema } from "../validations/organization.validation.js";
+import { orgIdSchema, createOrganizationSchema } from "../validations/organization.validation.js";
 import { getOrganizationsSchema } from "../validations/organization.validation.js";
 import { updateOrganizationSchema } from "../validations/organization.validation.js";
 import { AppError } from "../middlewares/error.middleware.js";
@@ -12,7 +12,7 @@ class OrganizationService {
     const { error, value } = createOrganizationSchema.validate(payload);
 
     if (error) {
-      const message = error.details.map((detail) => detail.message).join(", ");
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -21,7 +21,7 @@ class OrganizationService {
     // Check if organization name already exists
     const existingOrg = await organizationRepository.findByName(orgName);
     if (existingOrg) {
-      throw new AppError("Organization name already exists", 400);
+      throw new AppError("Organization name already exists", 409);
     }
 
     // Check if Adviser (User) exists
@@ -41,8 +41,15 @@ class OrganizationService {
     return mapOrganization(organization);
   }
 
-  async getOrganization(actorId, id) {
-    const organization = await organizationRepository.findById(id);
+  async getOrganization(actorId, orgId) {
+    const { error, value } = orgIdSchema.validate({ orgId });
+    if (error) {
+      const message = error.details[0].message.replace(/"/g, "");
+      throw new AppError(message, 400);
+    }
+
+    const organization = await organizationRepository.findById(value.orgId);
+
     if (!organization) {
       throw new AppError("Organization not found", 404);
     }
@@ -58,7 +65,7 @@ class OrganizationService {
   async updateOrganization(actorId, id, payload) {
     const { error, value } = updateOrganizationSchema.validate(payload);
     if (error) {
-      const message = error.details.map((detail) => detail.message).join(", ");
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -76,6 +83,11 @@ class OrganizationService {
   }
 
   async deleteOrganization(actorId, id) {
+    const { error } = orgIdSchema.validate({ orgId: id });
+
+    if (error) {
+      throw new AppError(error.details[0].message, 400);
+    }
     const deletedOrg = await organizationRepository.deleteById(id);
     if (!deletedOrg) {
       throw new AppError("Organization not found", 404);
@@ -92,20 +104,14 @@ class OrganizationService {
   async getAllOrganizations(actorId, query) {
     const { error, value } = getOrganizationsSchema.validate(query);
     if (error) {
-      const message = error.details.map((detail) => detail.message).join(", ");
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
     const { page, limit, sort, fields, ...filter } = value;
     const skip = (page - 1) * limit;
 
-    const organizations = await organizationRepository.findAll({
-      filter,
-      sort,
-      skip,
-      limit,
-      fields: fields?.split(",").join(" "),
-    });
+    const organizations = await organizationRepository.findAll({ filter, sort, skip, limit, fields: fields?.split(",").join(" ") });
 
     const total = await organizationRepository.count(filter);
 

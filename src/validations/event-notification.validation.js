@@ -29,17 +29,13 @@ const createBulkEventNotificationSchema = Joi.object({
     "string.length": "Event ID must be 24 characters",
     "any.required": "Event ID is required",
   }),
-  recipientIds: Joi.array()
-    .items(Joi.string().hex().length(24))
-    .min(1)
-    .required()
-    .messages({
-      "array.base": "Recipient IDs must be an array",
-      "array.min": "At least one recipient ID is required",
-      "any.required": "Recipient IDs are required",
-      "string.hex": "Each recipient ID must be a valid MongoDB ObjectId",
-      "string.length": "Each recipient ID must be 24 characters",
-    }),
+  recipientIds: Joi.array().items(Joi.string().hex().length(24)).min(1).required().messages({
+    "array.base": "Recipient IDs must be an array",
+    "array.min": "At least one recipient ID is required",
+    "any.required": "Recipient IDs are required",
+    "string.hex": "Each recipient ID must be a valid MongoDB ObjectId",
+    "string.length": "Each recipient ID must be 24 characters",
+  }),
   message: Joi.string().max(2000).required().messages({
     "string.max": "Message cannot exceed 2000 characters",
     "any.required": "Message is required",
@@ -64,35 +60,36 @@ const getEventNotificationsSchema = Joi.object({
   status: Joi.string().valid("sent", "read").optional().messages({
     "any.only": 'Status must be either "sent" or "read"',
   }),
-  sortBy: Joi.string()
-    .valid("sentAt", "createdAt", "updatedAt", "status")
-    .optional()
-    .default("sentAt")
-    .messages({
-      "any.only": "sortBy must be one of: sentAt, createdAt, updatedAt, status",
-    }),
+  sortBy: Joi.string().valid("sentAt", "createdAt", "updatedAt", "status").optional().default("sentAt").messages({
+    "any.only": "sortBy must be one of: sentAt, createdAt, updatedAt, status",
+  }),
   order: Joi.string().valid("asc", "desc").optional().default("desc").messages({
     "any.only": 'order must be either "asc" or "desc"',
   }),
   fields: Joi.string().optional().messages({
     "string.base": "Fields must be a string",
   }),
-  limit: Joi.number()
-    .integer()
-    .min(1)
-    .max(100)
-    .optional()
-    .default(10)
-    .messages({
-      "number.base": "Limit must be a number",
-      "number.integer": "Limit must be an integer",
-      "number.min": "Limit must be at least 1",
-      "number.max": "Limit cannot exceed 100",
-    }),
+  limit: Joi.number().integer().min(1).max(100).optional().default(10).messages({
+    "number.base": "Limit must be a number",
+    "number.integer": "Limit must be an integer",
+    "number.min": "Limit must be at least 1",
+    "number.max": "Limit cannot exceed 100",
+  }),
   page: Joi.number().integer().min(1).optional().default(1).messages({
     "number.base": "Page must be a number",
     "number.integer": "Page must be an integer",
     "number.min": "Page must be at least 1",
+  }),
+}).options({
+  abortEarly: false,
+  stripUnknown: true,
+});
+
+const eventIdSchema = Joi.object({
+  eventId: Joi.string().hex().length(24).required().messages({
+    "string.hex": "Event ID must be a valid MongoDB ObjectId",
+    "string.length": "Event ID must be 24 characters long",
+    "any.required": "Event ID is required",
   }),
 }).options({
   abortEarly: false,
@@ -135,11 +132,4 @@ const eventNotificationIdSchema = Joi.object({
   stripUnknown: true,
 });
 
-export {
-  createEventNotificationSchema,
-  updateEventNotificationSchema,
-  createBulkEventNotificationSchema,
-  eventNotificationIdSchema,
-  getEventNotificationsSchema,
-  getEventNotificationByIdSchema,
-};
+export { createEventNotificationSchema, eventIdSchema, updateEventNotificationSchema, createBulkEventNotificationSchema, eventNotificationIdSchema, getEventNotificationsSchema, getEventNotificationByIdSchema };

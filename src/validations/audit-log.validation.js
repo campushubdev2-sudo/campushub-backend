@@ -2,12 +2,24 @@ import Joi from "joi";
 import { ACTION_TYPES } from "../constants/action-types.js";
 
 const getAuditLogsSchema = Joi.object({
-  userId: Joi.string().hex().length(24).optional(),
+  userId: Joi.string().hex().length(24).optional().messages({
+    "string.base": "User ID must be a string.",
+    "string.hex": "User ID must be a valid hexadecimal string.",
+    "string.length": "User ID must be exactly 24 characters long.",
+  }),
   action: Joi.string()
     .valid(...ACTION_TYPES)
-    .optional(),
-  sort: Joi.string().optional(), // e.g. -createdAt
-  fields: Joi.string().optional(), // e.g. action,createdAt
+    .optional()
+    .messages({
+      "string.base": "Action must be a string.",
+      "any.only": "Action is not valid. Please select a supported action type.",
+    }),
+  sort: Joi.string().optional().messages({
+    "string.base": "Sort parameter must be a string.",
+  }),
+  fields: Joi.string().optional().messages({
+    "string.base": "Fields parameter must be a string.",
+  }),
 }).options({
   abortEarly: false,
   stripUnknown: true,

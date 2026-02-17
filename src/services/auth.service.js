@@ -14,12 +14,11 @@ class AuthService {
     const { error, value } = signInSchema.validate({ identifier, password });
 
     if (error) {
-      const message = error.details.map((d) => d.message).join(", ");
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
-    const { identifier: validatedIdentifier, password: validatedPassword } =
-      value;
+    const { identifier: validatedIdentifier, password: validatedPassword } = value;
 
     const user = await userRepository.findByIdentifier(validatedIdentifier);
 
@@ -27,10 +26,7 @@ class AuthService {
       throw new AppError("Invalid credentials", 401);
     }
 
-    const isPasswordValid = await bcrypt.compare(
-      validatedPassword,
-      user.password,
-    );
+    const isPasswordValid = await bcrypt.compare(validatedPassword, user.password);
 
     if (!isPasswordValid) {
       throw new AppError("Invalid credentials", 401);
@@ -51,7 +47,7 @@ class AuthService {
     const { error, value } = signupSchema.validate(payload);
 
     if (error) {
-      const message = error.details.map((detail) => detail.message).join(", ");
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -98,10 +94,7 @@ class AuthService {
 
   generateToken(user) {
     if (!user || !user._id || !user.email) {
-      throw new AppError(
-        "Valid user object with id and email is required",
-        400,
-      );
+      throw new AppError("Valid user object with id and email is required", 400);
     }
 
     const payload = {
@@ -140,7 +133,7 @@ class AuthService {
     const { error, value } = resetPasswordSchema.validate(payload);
 
     if (error) {
-      const message = error.details.map((detail) => detail.message).join(", ");
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 

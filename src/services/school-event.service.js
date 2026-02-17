@@ -17,7 +17,7 @@ class SchoolEventService {
   async createSchoolEvent(actorId, payload) {
     const { error, value } = createSchoolEventSchema.validate(payload);
     if (error) {
-      const message = error.details.map((detail) => detail.message).join(", ");
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -27,13 +27,7 @@ class SchoolEventService {
       throw new AppError("Event date cannot be in the past", 400);
     }
 
-    const event = await SchoolEventRepository.create({
-      title,
-      description,
-      date,
-      venue,
-      organizedBy,
-    });
+    const event = await SchoolEventRepository.create({ title, description, date, venue, organizedBy });
 
     await auditLogRepository.create({
       userId: actorId,
@@ -47,7 +41,7 @@ class SchoolEventService {
     const { error, value } = getAllSchoolEventsSchema.validate(payload);
 
     if (error) {
-      const message = error.details.map((detail) => detail.message);
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -70,7 +64,7 @@ class SchoolEventService {
     const { error, value } = getSchoolEventByIdSchema.validate(payload);
 
     if (error) {
-      const message = error.details.map((d) => d.message);
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -105,10 +99,7 @@ class SchoolEventService {
       throw new AppError("End date cannot be earlier than start date", 400);
     }
 
-    const events = await SchoolEventRepository.findByDateRange(
-      startDate,
-      endDate,
-    );
+    const events = await SchoolEventRepository.findByDateRange(startDate, endDate);
 
     await auditLogRepository.create({
       userId: actorId,
@@ -133,8 +124,8 @@ class SchoolEventService {
     const { error, value } = getMonthlyStatsSchema.validate(payload);
 
     if (error) {
-      const messages = error.details.map((detail) => detail.message);
-      throw new AppError(messages.join(", "), 400);
+      const message = error.details[0].message.replace(/"/g, "");
+      throw new AppError(message.join(", "), 400);
     }
 
     const { year } = value;
@@ -153,15 +144,9 @@ class SchoolEventService {
       };
     });
 
-    await auditLogRepository.create({
-      userId: actorId,
-      action: "Monthly Event Statistics",
-    });
+    await auditLogRepository.create({ userId: actorId, action: "Monthly Event Statistics" });
 
-    return {
-      year,
-      monthlyStats: formattedStats,
-    };
+    return { year, monthlyStats: formattedStats };
   }
 
   async getVenueStats(actorId) {
@@ -201,35 +186,23 @@ class SchoolEventService {
       const allowedUpdates = ["title", "description", "date", "venue"];
       const payloadKeys = Object.keys(payload);
 
-      const invalidFields = payloadKeys.filter(
-        (key) => !allowedUpdates.includes(key),
-      );
+      const invalidFields = payloadKeys.filter((key) => !allowedUpdates.includes(key));
 
       if (invalidFields.length > 0) {
-        throw new AppError(
-          `The following fields cannot be updated: ${invalidFields.join(", ")}`,
-          400,
-        );
+        throw new AppError(`The following fields cannot be updated: ${invalidFields.join(", ")}`, 400);
       }
 
-      const hasAllowedField = payloadKeys.some((key) =>
-        allowedUpdates.includes(key),
-      );
+      const hasAllowedField = payloadKeys.some((key) => allowedUpdates.includes(key));
       if (!hasAllowedField) {
-        throw new AppError(
-          "At least one valid field must be provided for update",
-          400,
-        );
+        throw new AppError("At least one valid field must be provided for update", 400);
       }
     }
 
-    const { error, value } = restrictFields
-      ? filteredUpdateSchema.validate(payload)
-      : updateEventSchema.validate(payload);
+    const { error, value } = restrictFields ? filteredUpdateSchema.validate(payload) : updateEventSchema.validate(payload);
 
     if (error) {
-      const messages = error.details.map((detail) => detail.message);
-      throw new AppError(messages.join(", "), 400);
+      const message = error.details[0].message.replace(/"/g, "");
+      throw new AppError(message, 400);
     }
 
     const existingEvent = await SchoolEventRepository.findById(id);
@@ -260,8 +233,8 @@ class SchoolEventService {
   async deleteSchoolEvent(actorId, id) {
     const { error, value } = deleteSchoolEventSchema.validate({ id });
     if (error) {
-      const messages = error.details.map((detail) => detail.message);
-      throw new AppError(messages.join(", "), 400);
+      const message = error.details[0].message.replace(/"/g, "");
+      throw new AppError(message, 400);
     }
 
     const { id: eventId } = value;

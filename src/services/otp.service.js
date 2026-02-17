@@ -17,7 +17,7 @@ class OtpService {
   async sendOtp(payload) {
     const { error, value } = sendOtpSchema.validate(payload);
     if (error) {
-      const message = error.details.map((detail) => detail.message).join(", ");
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -53,7 +53,7 @@ class OtpService {
   async resend(payload) {
     const { error, value } = sendOtpSchema.validate(payload);
     if (error) {
-      const message = error.details.map((detail) => detail.message).join(", ");
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -72,7 +72,7 @@ class OtpService {
   async verifyOtp(payload) {
     const { error, value } = verifyOtpSchema.validate(payload);
     if (error) {
-      const message = error.details.map((detail) => detail.message).join(", ");
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -111,9 +111,6 @@ class OtpService {
 
     // OTP verified successfully
     await otpRepository.markOtpVerified(otpDoc._id);
-
-    // clean up other OTPs for same email
-    // await otpRepository.deleteOtpsByEmail(email);
 
     return {
       email,

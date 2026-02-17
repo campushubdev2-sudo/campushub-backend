@@ -28,19 +28,7 @@ const createOfficerSchema = Joi.object({
   position: Joi.string()
     .max(50)
     .trim()
-    .valid(
-      ...BSBA_OFFICER_POSITIONS,
-      ...BSHM_OFFICER_POSITIONS,
-      ...JUNIOR_PHILIPPINE_BSA_OFFICER_POSITIONS,
-      ...SUPREME_STUDENT_COUNCIL_OFFICER_POSITIONS,
-      ...BSCRIM_OFFICER_POSITIONS,
-      ...MODERN_YOUNG_EDUCATORS_OFFICER_POSITIONS,
-      ...COLLEGE_OF_TEACHER_OFFICER_POSITIONS,
-      ...ELEM_OFFICER_POSITIONS,
-      ...SSLG_OFFICER_POSITIONS,
-      ...YWAV_OFFICER_POSITIONS,
-      ...JPCS_OFFICER_POSITIONS,
-    )
+    .valid(...BSBA_OFFICER_POSITIONS, ...BSHM_OFFICER_POSITIONS, ...JUNIOR_PHILIPPINE_BSA_OFFICER_POSITIONS, ...SUPREME_STUDENT_COUNCIL_OFFICER_POSITIONS, ...BSCRIM_OFFICER_POSITIONS, ...MODERN_YOUNG_EDUCATORS_OFFICER_POSITIONS, ...COLLEGE_OF_TEACHER_OFFICER_POSITIONS, ...ELEM_OFFICER_POSITIONS, ...SSLG_OFFICER_POSITIONS, ...YWAV_OFFICER_POSITIONS, ...JPCS_OFFICER_POSITIONS)
     .required()
     .messages({
       "string.base": `"position" must be a string`,
@@ -86,13 +74,9 @@ const getOfficersSchema = Joi.object({
     "number.min": "Limit must be at least 1.",
   }),
 
-  sortBy: Joi.string()
-    .valid("createdAt", "startTerm", "endTerm", "position")
-    .default("createdAt")
-    .messages({
-      "any.only":
-        "You can only sort by createdAt, startTerm, endTerm, or position.",
-    }),
+  sortBy: Joi.string().valid("createdAt", "startTerm", "endTerm", "position").default("createdAt").messages({
+    "any.only": "You can only sort by createdAt, startTerm, endTerm, or position.",
+  }),
 
   order: Joi.string().valid("asc", "desc").default("desc").messages({
     "any.only": "Order must be either 'asc' or 'desc'.",
@@ -136,9 +120,15 @@ const updateOfficerSchema = Joi.object({
     "string.hex": "Organization ID must be a valid ObjectId",
     "string.length": "Organization ID must be 24 characters long",
   }),
-  position: Joi.string().max(50).trim().messages({
-    "string.max": "Position cannot exceed 50 characters",
-  }),
+  position: Joi.string()
+    .max(50)
+    .trim()
+    .valid(...BSBA_OFFICER_POSITIONS, ...BSHM_OFFICER_POSITIONS, ...JUNIOR_PHILIPPINE_BSA_OFFICER_POSITIONS, ...SUPREME_STUDENT_COUNCIL_OFFICER_POSITIONS, ...BSCRIM_OFFICER_POSITIONS, ...MODERN_YOUNG_EDUCATORS_OFFICER_POSITIONS, ...COLLEGE_OF_TEACHER_OFFICER_POSITIONS, ...ELEM_OFFICER_POSITIONS, ...SSLG_OFFICER_POSITIONS, ...YWAV_OFFICER_POSITIONS, ...JPCS_OFFICER_POSITIONS)
+    .messages({
+      "string.base": "Position must be a string",
+      "string.max": "Position cannot exceed 50 characters",
+      "any.only": "Position is not a valid officer position",
+    }),
   startTerm: Joi.date().messages({
     "date.base": "Start term must be a valid date",
   }),
@@ -157,12 +147,9 @@ const updateOfficerSchema = Joi.object({
   });
 
 const getOfficersStatsByPeriodSchema = Joi.object({
-  period: Joi.string()
-    .valid("month", "quarter", "year")
-    .default("month")
-    .messages({
-      "any.only": "Period must be one of: month, quarter, year",
-    }),
+  period: Joi.string().valid("month", "quarter", "year").default("month").messages({
+    "any.only": "Period must be one of: month, quarter, year",
+  }),
 }).options({
   abortEarly: false,
   stripUnknown: true,
@@ -179,12 +166,4 @@ const getOfficersNearTermEndSchema = Joi.object({
   stripUnknown: true,
 });
 
-export {
-  createOfficerSchema,
-  getOfficersSchema,
-  getOfficerByIdSchema,
-  updateOfficerSchema,
-  getOfficersStatsByPeriodSchema,
-  getOfficersNearTermEndSchema,
-  deleteOfficerSchema,
-};
+export { createOfficerSchema, getOfficersSchema, getOfficerByIdSchema, updateOfficerSchema, getOfficersStatsByPeriodSchema, getOfficersNearTermEndSchema, deleteOfficerSchema };

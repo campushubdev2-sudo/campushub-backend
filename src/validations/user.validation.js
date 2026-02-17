@@ -1,12 +1,7 @@
 // src/validations/user.validation.js
 import Joi from "joi";
 
-import {
-  emailField,
-  phoneNumberField,
-  roleField,
-  usernameField,
-} from "./fields.js";
+import { emailField, passwordField, phoneNumberField, roleField, usernameField } from "./fields.js";
 
 const createUserSchema = Joi.object({
   username: usernameField.required().messages({
@@ -15,12 +10,18 @@ const createUserSchema = Joi.object({
   email: emailField.required().messages({
     "any.required": "Email is required",
   }),
-  password: Joi.string().min(8).max(128).required().messages({
-    "string.min": "Password must be at least 8 characters",
-    "string.max": "Password cannot exceed 128 characters",
-    "any.required": "Password is required",
+  password: passwordField
+    .required()
+    .min(8)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#^()_\-+=]).+$/)
+    .messages({
+      "any.required": "Password is required",
+      "string.min": "Password must be at least 8 characters",
+      "string.pattern.base": "Password must include uppercase, lowercase, number and special character",
+    }),
+  role: roleField.required().messages({
+    "any.required": "Role is required and cannot be empty",
   }),
-  role: roleField.default("student"),
   phoneNumber: phoneNumberField.required(),
 }).options({
   abortEarly: false,
@@ -50,8 +51,7 @@ const queryUsersSchema = Joi.object({
   }),
 
   role: roleField.optional().messages({
-    "any.only":
-      "Role filter must be one of: admin, student organization, officer, student",
+    "any.only": "Role filter must be one of: admin, student organization, officer, student",
   }),
 
   phoneNumber: phoneNumberField.optional().messages({
@@ -72,22 +72,24 @@ const userIdParamSchema = Joi.object({
 
 const updateUserSchema = Joi.object({
   username: usernameField.optional(),
-
+  password: passwordField
+    .min(8)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#^()_\-+=]).+$/)
+    .optional()
+    .messages({
+      "string.min": "Password must be at least 8 characters long",
+      "string.pattern.base": "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character",
+      "string.empty": "Password cannot be empty",
+    }),
   email: emailField.optional(),
-
   role: roleField.optional(),
-
   phoneNumber: phoneNumberField.optional(),
 })
-  .min(1) // must update at least one field
+  .min(1)
+  .messages({ "object.min": "Please provide at least one field to update." })
   .options({
     abortEarly: false,
     stripUnknown: true,
   });
 
-export {
-  createUserSchema,
-  queryUsersSchema,
-  userIdParamSchema,
-  updateUserSchema,
-};
+export { createUserSchema, queryUsersSchema, userIdParamSchema, updateUserSchema };

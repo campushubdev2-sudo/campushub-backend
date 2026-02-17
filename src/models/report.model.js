@@ -26,7 +26,7 @@ const ReportSchema = new Schema(
     ],
     status: {
       type: String,
-      enum: ["pending", "approved", "rejected"],
+      enum: ["pending", "approved", "rejected", "n/a"],
       default: "pending",
       required: true,
     },

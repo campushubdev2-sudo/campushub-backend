@@ -14,8 +14,9 @@ import auditLogRepository from "../repositories/audit-log.repository.js";
 class OfficerService {
   async createOfficer(actorId, payload) {
     const { error, value } = createOfficerSchema.validate(payload);
+
     if (error) {
-      const message = error.details.map((detail) => detail.message);
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -31,16 +32,10 @@ class OfficerService {
       throw new AppError("Organization not found", 404);
     }
 
-    const existingOfficer = await officerRepository.findByUserAndOrg(
-      userId,
-      orgId,
-    );
+    const existingOfficer = await officerRepository.findByUserAndOrg(userId, orgId);
 
     if (existingOfficer) {
-      throw new AppError(
-        "User is already an officer of this organization",
-        409,
-      );
+      throw new AppError("User is already an officer of this organization", 409);
     }
 
     const officer = await officerRepository.create({
@@ -62,7 +57,7 @@ class OfficerService {
   async deleteOfficerById(actorId, payload) {
     const { error, value } = deleteOfficerSchema.validate(payload);
     if (error) {
-      const message = error.details.map((detail) => detail.message).join(", ");
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -92,7 +87,8 @@ class OfficerService {
   async getOfficers(actorId, query) {
     const { error, value } = getOfficersSchema.validate(query);
     if (error) {
-      const message = error.details.map((d) => d.message);
+      const message = error.details[0].message.replace(/"/g, "");
+
       throw new AppError(message, 400);
     }
 
@@ -138,7 +134,7 @@ class OfficerService {
   async getOfficerById(actorId, params) {
     const { error, value } = getOfficerByIdSchema.validate(params);
     if (error) {
-      const message = error.details.map((detail) => detail.message);
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -161,7 +157,7 @@ class OfficerService {
     const { error, value } = updateOfficerSchema.validate(payload);
 
     if (error) {
-      const message = error.details.map((detail) => detail.message).join(", ");
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -179,10 +175,7 @@ class OfficerService {
     }
 
     if (value.startTerm && value.startTerm > existingOfficer.startTerm) {
-      throw new AppError(
-        "Cannot set start term after it has already begun",
-        400,
-      );
+      throw new AppError("Cannot set start term after it has already begun", 400);
     }
 
     if (value.endTerm && value.endTerm < existingOfficer.endTerm) {
@@ -205,21 +198,7 @@ class OfficerService {
   }
 
   async getOfficerStats(actorId) {
-    const [
-      totalOfficers,
-      activeOfficers,
-      inactiveOfficers,
-      byOrganization,
-      byPosition,
-      termStats,
-    ] = await Promise.all([
-      officerRepository.getTotalOfficersCount(),
-      officerRepository.getActiveOfficersCount(),
-      officerRepository.getInactiveOfficersCount(),
-      officerRepository.getOfficersCountByOrganization(),
-      officerRepository.getOfficersByPosition(),
-      officerRepository.getTermDurationStats(),
-    ]);
+    const [totalOfficers, activeOfficers, inactiveOfficers, byOrganization, byPosition, termStats] = await Promise.all([officerRepository.getTotalOfficersCount(), officerRepository.getActiveOfficersCount(), officerRepository.getInactiveOfficersCount(), officerRepository.getOfficersCountByOrganization(), officerRepository.getOfficersByPosition(), officerRepository.getTermDurationStats()]);
 
     await auditLogRepository.create({
       userId: actorId,
@@ -243,7 +222,7 @@ class OfficerService {
   async getOfficersByPeriod(actorId, payload) {
     const { error, value } = getOfficersStatsByPeriodSchema.validate(payload);
     if (error) {
-      const message = error.details.map((detail) => detail.message).join(", ");
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -273,7 +252,7 @@ class OfficerService {
   async getOfficersNearTermEnd(actorId, payload) {
     const { error, value } = getOfficersNearTermEndSchema.validate(payload);
     if (error) {
-      const message = error.details.map((detail) => detail.message).join(", ");
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -293,12 +272,14 @@ class OfficerService {
   }
 
   async getOrganizationOfficerStats(actorId, orgId) {
-    // Validate orgId
-    if (!orgId.match(/^[0-9a-fA-F]{24}$/)) {
-      throw new AppError("Invalid organization ID format", 400);
+    const { error, value } = getOfficerByIdSchema.validate({ id: orgId });
+    if (error) {
+      const message = error.details[0].message.replace(/"/g, "");
+      throw new AppError(message, 400);
     }
 
-    const result = await officerRepository.getOrganizationOfficerStats(orgId);
+    const { id } = value;
+    const result = await officerRepository.getOrganizationOfficerStats(id);
     if (!result) {
       throw new AppError("Organization not found", 404);
     }

@@ -11,10 +11,7 @@ import userService from "../services/user.service.js";
 class UserController {
   /** @param {Response} res */
   createUser = asyncHandler(async (req, res) => {
-    const newUser = await userService.createUser(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      req.body,
-    );
+    const newUser = await userService.createUser(/** @type {AuthenticatedRequest} */ (req).user.id, req.body);
 
     res.status(201).json({
       success: true,
@@ -25,10 +22,7 @@ class UserController {
 
   /** @param {Response} res */
   getUsers = asyncHandler(async (req, res) => {
-    const result = await userService.getUsers(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      req.query,
-    );
+    const result = await userService.getUsers(/** @type {AuthenticatedRequest} */ (req).user.id, req.query);
 
     res.status(200).json({
       success: true,
@@ -44,10 +38,7 @@ class UserController {
 
   /** @param {Response} res */
   getUserById = asyncHandler(async (req, res) => {
-    const user = await userService.getUserById(
-      req.params.id,
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-    );
+    const user = await userService.getUserById(req.params.id, /** @type {AuthenticatedRequest} */ (req).user.id);
 
     res.status(200).json({
       success: true,
@@ -58,11 +49,7 @@ class UserController {
 
   /** @param {Response} res */
   updateUser = asyncHandler(async (req, res) => {
-    const updatedUser = await userService.updateUser(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      req.params.id,
-      req.body,
-    );
+    const updatedUser = await userService.updateUser(/** @type {AuthenticatedRequest} */ (req).user.id, req.params.id, req.body);
 
     res.status(200).json({
       success: true,
@@ -73,10 +60,7 @@ class UserController {
 
   /** @param {Response} res */
   deleteUser = asyncHandler(async (req, res) => {
-    await userService.deleteUser(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-      req.params.id,
-    );
+    await userService.deleteUser(/** @type {AuthenticatedRequest} */ (req).user.id, req.params.id);
 
     res.status(200).json({
       success: true,
@@ -87,9 +71,7 @@ class UserController {
 
   /** @param {Response} res */
   getUserStats = asyncHandler(async (req, res) => {
-    const stats = await userService.getDashboardStats(
-      /** @type {AuthenticatedRequest} */ (req).user.id,
-    );
+    const stats = await userService.getDashboardStats(/** @type {AuthenticatedRequest} */ (req).user.id);
 
     res.status(200).json({
       success: true,

@@ -1,8 +1,9 @@
 import eventNotificationRepository from "../repositories/event-notification.repository.js";
 import { createEventNotificationSchema } from "../validations/event-notification.validation.js";
 import { createBulkEventNotificationSchema } from "../validations/event-notification.validation.js";
-import { getEventNotificationByIdSchema } from "../validations/event-notification.validation.js";
+import { eventIdSchema } from "../validations/event-notification.validation.js";
 import { getEventNotificationsSchema } from "../validations/event-notification.validation.js";
+import { getEventNotificationByIdSchema } from "../validations/event-notification.validation.js";
 import { updateEventNotificationSchema } from "../validations/event-notification.validation.js";
 import { eventNotificationIdSchema } from "../validations/event-notification.validation.js";
 import { AppError } from "../middlewares/error.middleware.js";
@@ -15,8 +16,8 @@ class EventNotificationService {
   async createEventNotification(actorId, payload) {
     const { error, value } = createEventNotificationSchema.validate(payload);
     if (error) {
-      const messages = error.details.map((detail) => detail.message);
-      throw new AppError(messages.join(", "), 400);
+      const errMessage = error.details[0].message.replace(/"/g, "");
+      throw new AppError(errMessage, 400);
     }
 
     const { eventId, recipientId, message, status } = value;
@@ -51,10 +52,7 @@ class EventNotificationService {
     } catch (smsError) {
       console.error("Failed to send SMS:", smsError);
 
-      await eventNotificationRepository.updateStatus(
-        notification._id,
-        "failed",
-      );
+      await eventNotificationRepository.updateStatus(notification._id, "failed");
     }
 
     await auditLogRepository.create({
@@ -75,11 +73,10 @@ class EventNotificationService {
   }
 
   async createBulkEventNotifications(actorId, payload) {
-    const { error, value } =
-      createBulkEventNotificationSchema.validate(payload);
+    const { error, value } = createBulkEventNotificationSchema.validate(payload);
     if (error) {
-      const messages = error.details.map((detail) => detail.message);
-      throw new AppError(messages.join(", "), 400);
+      const errMessage = error.details[0].message.replace(/"/g, "");
+      throw new AppError(errMessage, 400);
     }
 
     const { eventId, recipientIds, message, status } = value;
@@ -94,13 +91,8 @@ class EventNotificationService {
 
     if (users.length !== uniqueRecipientIds.length) {
       const foundIds = users.map((user) => user._id.toString());
-      const missingIds = uniqueRecipientIds.filter(
-        (id) => !foundIds.includes(id),
-      );
-      throw new AppError(
-        `Some recipients not found: ${missingIds.join(", ")}`,
-        404,
-      );
+      const missingIds = uniqueRecipientIds.filter((id) => !foundIds.includes(id));
+      throw new AppError(`Some recipients not found: ${missingIds.join(", ")}`, 404);
     }
 
     const notificationsData = uniqueRecipientIds.map((recipientId) => ({
@@ -111,35 +103,20 @@ class EventNotificationService {
       sentAt: new Date(),
     }));
 
-    const existingNotifications =
-      await eventNotificationRepository.findByEvent(eventId);
-    const existingRecipientIds = existingNotifications.map((n) =>
-      n.recipientId.toString(),
-    );
+    const existingNotifications = await eventNotificationRepository.findByEvent(eventId);
+    const existingRecipientIds = existingNotifications.map((n) => n.recipientId.toString());
 
-    const newNotificationsData = notificationsData.filter(
-      (notification) =>
-        !existingRecipientIds.includes(notification.recipientId.toString()),
-    );
+    const newNotificationsData = notificationsData.filter((notification) => !existingRecipientIds.includes(notification.recipientId.toString()));
 
     if (newNotificationsData.length === 0) {
-      throw new AppError(
-        "All recipients already have notifications for this event",
-        409,
-      );
+      throw new AppError("All recipients already have notifications for this event", 409);
     }
 
-    const createdNotifications =
-      await eventNotificationRepository.createMany(newNotificationsData);
+    const createdNotifications = await eventNotificationRepository.createMany(newNotificationsData);
 
     try {
       // Filter users who should receive SMS (those in newNotificationsData)
-      const newRecipientUsers = users.filter((user) =>
-        newNotificationsData.some(
-          (notification) =>
-            notification.recipientId.toString() === user._id.toString(),
-        ),
-      );
+      const newRecipientUsers = users.filter((user) => newNotificationsData.some((notification) => notification.recipientId.toString() === user._id.toString()));
 
       // Send SMS to each recipient
       for (const user of newRecipientUsers) {
@@ -190,34 +167,20 @@ class EventNotificationService {
     const { error, value } = getEventNotificationsSchema.validate(queryParams);
 
     if (error) {
-      const message = error.details.map((detail) => detail.message).join(", ");
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400); // message: string, statusCode: number
     }
 
-    const { eventId, recipientId, status, sortBy, order, fields, limit, page } =
-      value;
+    const { eventId, recipientId, status, sortBy, order, fields, limit, page } = value;
 
     // Additional business logic validations
     if (fields) {
-      const allowedFields = [
-        "eventId",
-        "recipientId",
-        "message",
-        "sentAt",
-        "status",
-        "createdAt",
-        "updatedAt",
-      ];
+      const allowedFields = ["eventId", "recipientId", "message", "sentAt", "status", "createdAt", "updatedAt"];
       const requestedFields = fields.split(",").map((f) => f.trim());
-      const invalidFields = requestedFields.filter(
-        (field) => !allowedFields.includes(field),
-      );
+      const invalidFields = requestedFields.filter((field) => !allowedFields.includes(field));
 
       if (invalidFields.length > 0) {
-        throw new AppError(
-          `Invalid field(s) requested: ${invalidFields.join(", ")}. Allowed fields: ${allowedFields.join(", ")}`,
-          400,
-        );
+        throw new AppError(`Invalid field(s) requested: ${invalidFields.join(", ")}. Allowed fields: ${allowedFields.join(", ")}`, 400);
       }
     }
 
@@ -249,7 +212,7 @@ class EventNotificationService {
     });
 
     if (error) {
-      const message = error.details.map((detail) => detail.message).join(", ");
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400); // message: string, statusCode: number
     }
 
@@ -273,37 +236,29 @@ class EventNotificationService {
   }
 
   async updateEventNotification(actorId, payload) {
-    const { error: idError, value: idValue } =
-      eventNotificationIdSchema.validate({
-        id: payload.id,
-      });
+    const { error: idError, value: idValue } = eventNotificationIdSchema.validate({
+      id: payload.id,
+    });
 
     if (idError) {
-      const messages = idError.details.map((detail) => detail.message);
-      throw new AppError(messages.join(", "), 400);
+      const message = idError.details[0].message.replace(/"/g, "");
+      throw new AppError(message, 400);
     }
 
-    const { error, value } = updateEventNotificationSchema.validate(
-      payload.updateData,
-    );
+    const { error, value } = updateEventNotificationSchema.validate(payload.updateData);
 
     if (error) {
-      const messages = error.details.map((detail) => detail.message);
-      throw new AppError(messages.join(", "), 400);
+      const message = error.details[0].message.replace(/"/g, "");
+      throw new AppError(message, 400);
     }
 
     const { message, status } = value;
 
     if (!message && !status) {
-      throw new AppError(
-        "At least one field (message or status) is required for update",
-        400,
-      );
+      throw new AppError("At least one field (message or status) is required for update", 400);
     }
 
-    const existingNotification = await eventNotificationRepository.findById(
-      idValue.id,
-    );
+    const existingNotification = await eventNotificationRepository.findById(idValue.id);
     if (!existingNotification) {
       throw new AppError("Event notification not found", 404);
     }
@@ -316,15 +271,9 @@ class EventNotificationService {
       updateData.status = status;
     }
 
-    const updatedNotification = await eventNotificationRepository.updateById(
-      idValue.id,
-      updateData,
-    );
+    const updatedNotification = await eventNotificationRepository.updateById(idValue.id, updateData);
 
-    const populatedNotification =
-      await eventNotificationRepository.findByIdWithEventAndRecipient(
-        updatedNotification._id,
-      );
+    const populatedNotification = await eventNotificationRepository.findByIdWithEventAndRecipient(updatedNotification._id);
 
     await auditLogRepository.create({
       userId: actorId,
@@ -338,8 +287,8 @@ class EventNotificationService {
     const { error, value } = eventNotificationIdSchema.validate(payload);
 
     if (error) {
-      const messages = error.details.map((detail) => detail.message);
-      throw new AppError(messages.join(", "), 400);
+      const message = error.details[0].message.replace(/"/g, "");
+      throw new AppError(message, 400);
     }
 
     const { id } = value;
@@ -349,8 +298,7 @@ class EventNotificationService {
       throw new AppError("Event notification not found", 404);
     }
 
-    const deletedNotification =
-      await eventNotificationRepository.deleteById(id);
+    const deletedNotification = await eventNotificationRepository.deleteById(id);
 
     const notificationData = {
       _id: deletedNotification._id,
@@ -379,12 +327,24 @@ class EventNotificationService {
   }
 
   async getEventStats(actorId, eventId) {
+    const { error, value } = eventIdSchema.validate({ eventId });
+    if (error) {
+      const message = error.details[0].message.replace(/"/g, "");
+      throw new AppError(message, 400);
+    }
+
+    // check if event exists
+    const event = await eventNotificationRepository.findById(value.eventId);
+    if (!event) {
+      throw new AppError("Event not found", 404);
+    }
+
     await auditLogRepository.create({
       userId: actorId,
       action: "Notification Statistics",
     });
 
-    return await eventNotificationRepository.getEventStats(eventId);
+    return await eventNotificationRepository.getEventStats(value.eventId);
   }
 }
 

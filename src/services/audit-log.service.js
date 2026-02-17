@@ -9,7 +9,7 @@ class AuditLogService {
     const { error, value } = getAuditLogsSchema.validate(query);
 
     if (error) {
-      const message = error.details.map((detail) => detail.message);
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -34,7 +34,7 @@ class AuditLogService {
     const { error, value } = getAuditLogByIdSchema.validate(payload);
 
     if (error) {
-      const message = error.details.map((detail) => detail.message);
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -55,7 +55,7 @@ class AuditLogService {
     const { error, value } = deleteAuditLogSchema.validate(payload);
 
     if (error) {
-      const message = error.details.map((d) => d.message);
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 

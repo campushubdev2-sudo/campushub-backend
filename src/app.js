@@ -5,7 +5,7 @@ import express from "express";
 import cors from "cors";
 
 // INTERNAL DEPENDENCIES
-import { PORT, NODE_ENV } from "./config/env.js";
+import { PORT, NODE_ENV, CLIENT_URL } from "./config/env.js";
 import connectToDatabase from "./database/mongodb.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
 import requestLogger from "./middlewares/request-logger.middleware.js";
@@ -23,22 +23,28 @@ import reportsRoutes from "./routes/report.route.js";
 import auditLogRoutes from "./routes/audit-log.route.js";
 
 const app = express();
+const isDev = NODE_ENV === "development";
+/** @type {import("http").Server} */
+let server;
 
-app.set("trust proxy", 1);
+app.set("trust proxy", true);
 
-if (NODE_ENV === "development") {
-  app.use(cors({ origin: "http://localhost:5173" }));
-}
-
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
-
-if (NODE_ENV === "development") {
+if (isDev) {
   app.use(requestLogger);
 }
 
+app.use(cors({ origin: NODE_ENV === "development" ? "http://localhost:5173" : CLIENT_URL, credentials: true }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
 app.get("/", (_, res) => {
-  res.send("Welcome to the campushub API!");
+  res.status(200).json({
+    success: true,
+    message: "Server is healthy",
+    environment: NODE_ENV,
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
 });
 
 app.use("/api/v1/auth", authRoutes);
@@ -62,22 +68,31 @@ app.use((req, res) => {
 
 app.use(errorMiddleware);
 
-const server = app.listen(PORT, async () => {
-  await connectToDatabase();
+(async () => {
+  try {
+    await connectToDatabase();
 
-  if (NODE_ENV === "development") {
-    console.log(`Server is listening at http://localhost:${PORT}`);
-  } else {
-    console.log(`Server is running on on port ${PORT}`);
+    server = app.listen(PORT, () => {
+      if (isDev) {
+        console.log(`Server is listening at http://localhost:${PORT}`);
+      } else {
+        console.log(`Server is running on port ${PORT}`);
+      }
+    });
+  } catch (err) {
+    console.error("Startup failed:", err);
+    process.exit(1);
   }
-});
+})();
 
-process.on("SIGTERM", () => {
+const shutdown = () => {
   console.log("Shutting down...");
-  server.close(() => process.exit(0));
-});
+  if (server) {
+    server.close(() => process.exit(0));
+  } else {
+    process.exit(1);
+  }
+};
 
-process.on("SIGINT", () => {
-  console.log("Shutting down...");
-  server.close(() => process.exit(0));
-});
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);

@@ -11,7 +11,7 @@ class UserService {
   async createUser(actorId, payload) {
     const { error, value } = createUserSchema.validate(payload);
     if (error) {
-      const message = error.details.map((detail) => detail.message).join(", ");
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -50,7 +50,7 @@ class UserService {
   async getUsers(actorId, query) {
     const { error, value } = queryUsersSchema.validate(query);
     if (error) {
-      const message = error.details.map((detail) => detail.message).join(", ");
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -85,7 +85,8 @@ class UserService {
   async getUserById(userId, actorId) {
     const { error } = userIdParamSchema.validate({ id: userId });
     if (error) {
-      throw new AppError("Invalid user id", 400);
+      const message = error.details[0].message.replace(/"/g, "");
+      throw new AppError(message, 400);
     }
 
     const user = await userRepository.findById(userId);
@@ -104,12 +105,13 @@ class UserService {
   async updateUser(actorId, id, payload) {
     const { error: idError } = userIdParamSchema.validate({ id });
     if (idError) {
-      throw new AppError("Invalid user id", 400);
+      const message = idError.details[0].message.replace(/"/g, "");
+      throw new AppError(message, 400);
     }
 
     const { error, value } = updateUserSchema.validate(payload);
     if (error) {
-      const message = error.details.map((detail) => detail.message).join(", ");
+      const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
@@ -125,6 +127,11 @@ class UserService {
         throw new AppError("Cannot update the last admin", 403);
       }
     }
+
+    if (value.password) {
+      value.password = await authService.hashPassword(value.password);
+    }
+
     const updatedUser = await userRepository.updateById(id, value);
 
     await auditLogRepository.create({
@@ -138,7 +145,8 @@ class UserService {
   async deleteUser(actorId, id) {
     const { error } = userIdParamSchema.validate({ id });
     if (error) {
-      throw new AppError("Invalid user id", 400);
+      const message = error.details[0].message.replace(/"/g, "");
+      throw new AppError(message, 400);
     }
     const user = await userRepository.findById(id);
     if (!user) {
@@ -166,10 +174,7 @@ class UserService {
    * Dashboard
    */
   async getDashboardStats(actorId) {
-    const [totalUsers, byRole] = await Promise.all([
-      userRepository.getTotalUsers(),
-      userRepository.getOverviewStats(),
-    ]);
+    const [totalUsers, byRole] = await Promise.all([userRepository.getTotalUsers(), userRepository.getOverviewStats()]);
 
     await auditLogRepository.create({
       userId: actorId,
