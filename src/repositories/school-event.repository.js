@@ -44,7 +44,7 @@ class SchoolEventRepository {
 
     const totalPages = Math.ceil(total / limit);
 
-    if (page > totalPages) {
+    if (total > 0 && page > totalPages) {
       throw new AppError(
         `Invalid page number. Maximum page is ${totalPages}.`,
         400,
