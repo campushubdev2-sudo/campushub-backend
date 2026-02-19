@@ -1,5 +1,34 @@
+// @ts-check
 import Joi from "joi";
 
+/**
+ * @typedef {Object} CreateCalendarEntryBody
+ * @property {string} eventId - 24 character hex string (MongoDB ObjectId)
+ * @property {string} createdBy - 24 character hex string (MongoDB ObjectId)
+ */
+
+/**
+ * @typedef {Object} GetCalendarEntriesQuery
+ * @property {number} [page=1]
+ * @property {number} [limit=10]
+ * @property {"createdAt"|"dateAdded"} [sortBy="createdAt"]
+ * @property {"asc"|"desc"} [order="desc"]
+ * @property {string} [eventId] - 24 character hex string
+ * @property {string} [createdBy] - 24 character hex string
+ */
+
+/**
+ * @typedef {Object} UpdateCalendarEntryBody
+ * @property {string} eventId - 24 character hex string
+ * @property {string} createdBy - 24 character hex string
+ */
+
+/**
+ * @typedef {Object} CalendarEntryIdParam
+ * @property {string} id - 24 character hex string
+ */
+
+/** @type {Joi.ObjectSchema<CreateCalendarEntryBody>} */
 const createCalendarEntrySchema = Joi.object({
   eventId: Joi.string().hex().length(24).required().messages({
     "string.hex": "Event ID must be a valid hexadecimal string",
@@ -16,6 +45,7 @@ const createCalendarEntrySchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<GetCalendarEntriesQuery>} */
 const getCalendarEntriesSchema = Joi.object({
   page: Joi.number().integer().min(1).default(1).messages({
     "number.base": "Page must be a number",
@@ -56,6 +86,7 @@ const getCalendarEntriesSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<UpdateCalendarEntryBody>} */
 const updateCalendarEntrySchema = Joi.object({
   eventId: Joi.string().hex().length(24).required().messages({
     "string.hex": "Event ID must be a valid MongoDB ObjectId",
@@ -72,6 +103,7 @@ const updateCalendarEntrySchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<CalendarEntryIdParam>} */
 const deleteCalendarEntrySchema = Joi.object({
   id: Joi.string().hex().length(24).required().messages({
     "any.required": "id is required",
@@ -83,6 +115,7 @@ const deleteCalendarEntrySchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<CalendarEntryIdParam>} */
 const getCalendarEntryByIdSchema = Joi.object({
   id: Joi.string().length(24).hex().required().messages({
     "any.required": "id is required",

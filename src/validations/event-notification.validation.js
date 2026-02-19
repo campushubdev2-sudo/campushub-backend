@@ -1,5 +1,51 @@
+// @ts-check
 import Joi from "joi";
 
+/**
+ * @typedef {Object} CreateEventNotificationBody
+ * @property {string} eventId - 24 character MongoDB ObjectId
+ * @property {string} recipientId - 24 character MongoDB ObjectId
+ * @property {string} message
+ * @property {"sent"|"failed"} [status="sent"]
+ */
+
+/**
+ * @typedef {Object} CreateBulkEventNotificationBody
+ * @property {string} eventId - 24 character MongoDB ObjectId
+ * @property {string[]} recipientIds - Array of 24 character MongoDB ObjectIds
+ * @property {string} message
+ * @property {"sent"|"read"} [status="sent"]
+ */
+
+/**
+ * @typedef {Object} GetEventNotificationsQuery
+ * @property {string} [eventId]
+ * @property {string} [recipientId]
+ * @property {"sent"|"read"} [status]
+ * @property {"sentAt"|"createdAt"|"updatedAt"|"status"} [sortBy="sentAt"]
+ * @property {"asc"|"desc"} [order="desc"]
+ * @property {string} [fields]
+ * @property {number} [limit=10]
+ * @property {number} [page=1]
+ */
+
+/**
+ * @typedef {Object} EventIdParam
+ * @property {string} eventId
+ */
+
+/**
+ * @typedef {Object} EventNotificationIdParam
+ * @property {string} id
+ */
+
+/**
+ * @typedef {Object} UpdateEventNotificationBody
+ * @property {string} [message]
+ * @property {"sent"|"failed"} [status]
+ */
+
+/** @type {Joi.ObjectSchema<CreateEventNotificationBody>} */
 const createEventNotificationSchema = Joi.object({
   eventId: Joi.string().hex().length(24).required().messages({
     "string.hex": "Event ID must be a valid MongoDB ObjectId",
@@ -23,6 +69,7 @@ const createEventNotificationSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<CreateBulkEventNotificationBody>} */
 const createBulkEventNotificationSchema = Joi.object({
   eventId: Joi.string().hex().length(24).required().messages({
     "string.hex": "Event ID must be a valid MongoDB ObjectId",
@@ -48,6 +95,7 @@ const createBulkEventNotificationSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<GetEventNotificationsQuery>} */
 const getEventNotificationsSchema = Joi.object({
   eventId: Joi.string().hex().length(24).optional().messages({
     "string.hex": "Event ID must be a valid hex string",
@@ -85,6 +133,7 @@ const getEventNotificationsSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<EventIdParam>} */
 const eventIdSchema = Joi.object({
   eventId: Joi.string().hex().length(24).required().messages({
     "string.hex": "Event ID must be a valid MongoDB ObjectId",
@@ -96,6 +145,7 @@ const eventIdSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<EventNotificationIdParam>} */
 const getEventNotificationByIdSchema = Joi.object({
   id: Joi.string().hex().length(24).required().messages({
     "string.hex": "Notification ID must be a valid hex string",
@@ -107,6 +157,7 @@ const getEventNotificationByIdSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<UpdateEventNotificationBody>} */
 const updateEventNotificationSchema = Joi.object({
   message: Joi.string().max(2000).messages({
     "string.max": "Message cannot exceed 2000 characters",
@@ -119,6 +170,7 @@ const updateEventNotificationSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<EventNotificationIdParam>} */
 const eventNotificationIdSchema = Joi.object({
   id: Joi.string()
     .pattern(/^[0-9a-fA-F]{24}$/)

@@ -327,14 +327,15 @@ class EventNotificationService {
   }
 
   async getEventStats(actorId, eventId) {
+    console.log("eventId: ", eventId);
+
     const { error, value } = eventIdSchema.validate({ eventId });
     if (error) {
       const message = error.details[0].message.replace(/"/g, "");
       throw new AppError(message, 400);
     }
 
-    // check if event exists
-    const event = await eventNotificationRepository.findById(value.eventId);
+    const event = await eventNotificationRepository.getEventStats(value.eventId);
     if (!event) {
       throw new AppError("Event not found", 404);
     }

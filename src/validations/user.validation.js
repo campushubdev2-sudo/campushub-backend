@@ -1,8 +1,42 @@
-// src/validations/user.validation.js
+// @ts-check
 import Joi from "joi";
 
 import { emailField, passwordField, phoneNumberField, roleField, usernameField } from "./fields.js";
 
+/**
+ * @typedef CreateUserBody
+ * @property {string} username
+ * @property {string} email
+ * @property {string} password
+ * @property {"admin"|"adviser"|"officer"|"student"} role
+ * @property {string} phoneNumber
+ */
+
+/**
+ * @typedef QueryUsers
+ * @property {number} [page]
+ * @property {number} [limit]
+ * @property {string} [email]
+ * @property {string} [username]
+ * @property {"admin"|"adviser"|"officer"|"student"} [role]
+ * @property {string} [phoneNumber]
+ */
+
+/**
+ * @typedef UserIdParam
+ * @property {string} id
+ */
+
+/**
+ * @typedef UpdateUserBody
+ * @property {string} [username]
+ * @property {string} [email]
+ * @property {string} [password]
+ * @property {"admin"|"adviser"|"officer"|"student"} [role]
+ * @property {string} [phoneNumber]
+ */
+
+/** @type {Joi.ObjectSchema<CreateUserBody>} */
 const createUserSchema = Joi.object({
   username: usernameField.required().messages({
     "any.required": "Username is required",
@@ -28,6 +62,7 @@ const createUserSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<QueryUsers>} */
 const queryUsersSchema = Joi.object({
   page: Joi.number().integer().min(1).default(1).messages({
     "number.base": "Page must be a number",
@@ -62,6 +97,7 @@ const queryUsersSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<UserIdParam>} */
 const userIdParamSchema = Joi.object({
   id: Joi.string().length(24).hex().required().messages({
     "string.length": "Invalid user id",
@@ -70,6 +106,7 @@ const userIdParamSchema = Joi.object({
   }),
 });
 
+/** @type {Joi.ObjectSchema<UpdateUserBody>} */
 const updateUserSchema = Joi.object({
   username: usernameField.optional(),
   password: passwordField

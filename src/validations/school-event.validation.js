@@ -1,5 +1,59 @@
+// @ts-check
 import Joi from "joi";
 
+/**
+ * @typedef CreateSchoolEventBody
+ * @property {string} title
+ * @property {string} [description]
+ * @property {string} date - ISO date string
+ * @property {string} venue
+ * @property {"admin"|"department"} organizedBy
+ */
+
+/**
+ * @typedef UpdateSchoolEventBody
+ * @property {string} [title]
+ * @property {string} [description]
+ * @property {string} [date]
+ * @property {string} [venue]
+ * @property {"admin"|"department"} [organizedBy]
+ */
+
+/**
+ * @typedef GetAllSchoolEventsQuery
+ * @property {number} [page]
+ * @property {number} [limit]
+ * @property {string} [title]
+ * @property {string} [venue]
+ * @property {"admin"|"department"} [organizedBy]
+ * @property {string} [date]
+ * @property {"all"|"upcoming"|"past"} [type]
+ * @property {"date"|"createdAt"|"title"} [sortBy]
+ * @property {"asc"|"desc"} [order]
+ */
+
+/**
+ * @typedef EventIdParams
+ * @property {string} id
+ */
+
+/**
+ * @typedef FilterEventsQuery
+ * @property {string} startDate
+ * @property {string} endDate
+ */
+
+/**
+ * @typedef GetMonthlyStatsQuery
+ * @property {number} [year]
+ */
+
+/**
+ * @typedef GetRecentEventsQuery
+ * @property {number} [limit]
+ */
+
+/** @type {Joi.ObjectSchema<CreateSchoolEventBody>} */
 const createSchoolEventSchema = Joi.object({
   title: Joi.string().max(100).required().messages({
     "string.empty": "The event title cannot be empty.",
@@ -29,6 +83,7 @@ const createSchoolEventSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<UpdateSchoolEventBody>} */
 const filteredUpdateSchema = Joi.object({
   title: Joi.string().max(100).trim().messages({
     "string.max": "Title cannot exceed 100 characters",
@@ -52,6 +107,7 @@ const filteredUpdateSchema = Joi.object({
     stripUnknown: true,
   });
 
+/** @type {Joi.ObjectSchema<GetAllSchoolEventsQuery>} */
 const getAllSchoolEventsSchema = Joi.object({
   page: Joi.number().integer().min(1).default(1).messages({
     "number.base": "Page must be a number.",
@@ -91,6 +147,7 @@ const getAllSchoolEventsSchema = Joi.object({
   .unknown(false)
   .options({ stripUnknown: true, abortEarly: false });
 
+/** @type {Joi.ObjectSchema<EventIdParams>} */
 const getSchoolEventByIdSchema = Joi.object({
   id: Joi.string().hex().length(24).required().messages({
     "string.base": "Event ID must be a string",
@@ -104,6 +161,7 @@ const getSchoolEventByIdSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<FilterEventsQuery>} */
 const filterEventsSchema = Joi.object({
   startDate: Joi.date().required().messages({
     "date.base": "Start date must be a valid date",
@@ -119,6 +177,7 @@ const filterEventsSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<GetMonthlyStatsQuery>} */
 const getMonthlyStatsSchema = Joi.object({
   year: Joi.number().integer().min(2000).max(2100).default(new Date().getFullYear()).messages({
     "number.base": "Year must be a number.",
@@ -132,6 +191,7 @@ const getMonthlyStatsSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<GetRecentEventsQuery>} */
 const getRecentEventsSchema = Joi.object({
   limit: Joi.number().integer().min(1).max(50).default(5).messages({
     "number.base": '"limit" must be a number',
@@ -144,6 +204,7 @@ const getRecentEventsSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<UpdateSchoolEventBody>} */
 const updateEventSchema = Joi.object({
   title: Joi.string().max(100).trim().messages({
     "string.max": "Title cannot exceed 100 characters",
@@ -170,6 +231,7 @@ const updateEventSchema = Joi.object({
     stripUnknown: true,
   });
 
+/** @type {Joi.ObjectSchema<EventIdParams>} */
 const deleteSchoolEventSchema = Joi.object({
   id: Joi.string().hex().length(24).required().messages({
     "string.base": "Event ID must be a string",

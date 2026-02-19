@@ -63,17 +63,11 @@ class OfficerService {
 
     const { id } = value;
 
-    const officerExists = await officerRepository.checkOfficerExists(id);
-    if (!officerExists) {
+    // Atomic: find and delete in one operation
+    const officer = await officerRepository.findOneAndDelete({ _id: id });
+
+    if (!officer) {
       throw new AppError("Officer not found", 404);
-    }
-
-    const officer = await officerRepository.findById(id);
-
-    const deletedOfficer = await officerRepository.deleteOfficerById(id);
-
-    if (!deletedOfficer) {
-      throw new AppError("Failed to delete officer", 500);
     }
 
     await auditLogRepository.create({

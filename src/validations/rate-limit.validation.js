@@ -1,6 +1,14 @@
-// src/validations/rate-limit.js
+// @ts-check
 import Joi from "joi";
 
+/**
+ * @typedef RateLimiterConfig
+ * @property {number} limit - Maximum number of requests allowed
+ * @property {number} windowMs - Time window in milliseconds
+ * @property {(() => string) | undefined} [keyGenerator] - Optional function to generate keys
+ */
+
+/** @type {Joi.ObjectSchema<RateLimiterConfig>} */
 const rateLimiterSchema = Joi.object({
   limit: Joi.number().integer().positive().required().messages({
     "number.base": `"limit" must be a number`,

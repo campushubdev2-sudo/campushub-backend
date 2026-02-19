@@ -44,9 +44,7 @@ const authenticate = async (req, _res, next) => {
     const payload = authService.verifyToken(token);
 
     // Type assertion for the payload
-    const { userId, username, email, role } = /** @type {JwtPayload} */ (
-      payload
-    );
+    const { userId, username, email, role } = /** @type {JwtPayload} */ (payload);
 
     /** @type {AuthUser} */
     req.user = {
@@ -75,7 +73,7 @@ const optionalAuthenticate = async (req, _res, next) => {
 
     // Check Authorization header if no cookie token
     if (!token && req.headers.authorization) {
-      if (req.headers.authorization.startsWith("Bearer")) {
+      if (req.headers.authorization.startsWith("Bearer ")) {
         token = req.headers.authorization.split(" ")[1];
       }
     }
@@ -90,9 +88,7 @@ const optionalAuthenticate = async (req, _res, next) => {
     const payload = authService.verifyToken(token);
 
     // Type assertion for the payload
-    const { userId, username, email, role } = /** @type {JwtPayload} */ (
-      payload
-    );
+    const { userId, username, email, role } = /** @type {JwtPayload} */ (payload);
 
     /** @type {AuthUser} */
     req.user = {
@@ -124,9 +120,7 @@ const authorize =
     const userRole = req.user?.role || "guest";
 
     if (!allowedRoles.includes(userRole)) {
-      return next(
-        new AppError(`Forbidden: role "${userRole}" is not allowed`, 403),
-      );
+      return next(new AppError(`Forbidden: role "${userRole}" is not allowed`, 403));
     }
 
     return next();

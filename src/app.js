@@ -3,6 +3,7 @@
 // EXTERNAL DEPENDENCIES
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 // INTERNAL DEPENDENCIES
 import { PORT, NODE_ENV, CLIENT_URL } from "./config/env.js";
@@ -27,13 +28,16 @@ const isDev = NODE_ENV === "development";
 /** @type {import("http").Server} */
 let server;
 
-app.set("trust proxy", true);
+if (!isDev) {
+  app.set("trust proxy", true);
+}
 
 if (isDev) {
   app.use(requestLogger);
 }
 
-app.use(cors({ origin: NODE_ENV === "development" ? "http://localhost:5173" : CLIENT_URL, credentials: true }));
+app.use(cors({ origin: isDev ? "http://localhost:5173" : CLIENT_URL, credentials: true }));
+app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
@@ -85,12 +89,33 @@ app.use(errorMiddleware);
   }
 })();
 
-const shutdown = () => {
-  console.log("Shutting down...");
-  if (server) {
-    server.close(() => process.exit(0));
-  } else {
+/** @type {boolean} */
+let shuttingDown = false;
+
+/**
+ *
+ * @param {NodeJS.Signals} signal
+ * @returns {Promise<void>}
+ */
+const shutdown = async (signal) => {
+  if (shuttingDown) return;
+  shuttingDown = true;
+
+  console.log(`Received ${signal}. Shutting down...`);
+
+  try {
+    if (server) {
+      await new Promise((resolve, reject) => {
+        server.close((err) => {
+          err ? reject(err) : resolve(undefined);
+        });
+      });
+    }
+
     process.exit(1);
+  } catch (error) {
+    console.error("Graceful shutdown failed:", error);
+    process.exitCode = 1;
   }
 };
 

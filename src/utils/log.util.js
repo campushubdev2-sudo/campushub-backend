@@ -1,14 +1,12 @@
 // src/utils/log.util.js
 import path from "path";
 
+/**
+ * @param  {...any} data - Any number of values to log
+ */
 const log = (...data) => {
   const stack = new Error().stack.split("\n").slice(1);
-  const callerLine = stack.find(
-    (line) =>
-      !line.includes("log.util.js") &&
-      !line.includes("node:internal") &&
-      line.includes(":"),
-  );
+  const callerLine = stack.find((line) => !line.includes("log.util.js") && !line.includes("node:internal") && line.includes(":"));
 
   const match = callerLine?.match(/(?:at\s+)?(?:\((.*)\)|(\S+)):\d+:\d+$/);
   let filePath = (match?.[1] || match?.[2] || "")?.replace("file:///", "");

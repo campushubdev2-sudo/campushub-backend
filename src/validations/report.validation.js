@@ -1,6 +1,48 @@
-// src/validations/report.validation.js
+// @ts-check
 import Joi from "joi";
 
+/**
+ * @typedef ReportFile
+ * @property {string} filePath
+ */
+
+/**
+ * @typedef CreateReportBody
+ * @property {string} orgId
+ * @property {"actionPlan"|"bylaws"|"financial"|"proposal"} reportType
+ * @property {string[]} filePaths
+ * @property {"pending"|"approved"|"rejected"} [status]
+ */
+
+/**
+ * @typedef GetAllReportsQuery
+ * @property {number} [page]
+ * @property {number} [limit]
+ * @property {string} [orgId]
+ * @property {"actionPlan"|"bylaws"|"financial"|"proposal"} [reportType]
+ * @property {string} [submittedBy]
+ * @property {"submittedDate"|"createdAt"|"updatedAt"} [sortBy]
+ * @property {"asc"|"desc"} [sortOrder]
+ */
+
+/**
+ * @typedef DownloadReportFilesParams
+ * @property {string} id
+ */
+
+/**
+ * @typedef UpdateReportStatusBody
+ * @property {string} id
+ * @property {"pending"|"approved"|"rejected"} status
+ * @property {string} [message] - Only allowed when status is "approved"
+ */
+
+/**
+ * @typedef DeleteReportParams
+ * @property {string} id
+ */
+
+/** @type {Joi.ObjectSchema<CreateReportBody>} */
 const createReportSchema = Joi.object({
   orgId: Joi.string().hex().length(24).required().messages({
     "string.hex": "Organization ID must be a valid MongoDB ObjectId",
@@ -30,6 +72,7 @@ const createReportSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<GetAllReportsQuery>} */
 const getAllReportsQuerySchema = Joi.object({
   page: Joi.number().integer().min(1).default(1).messages({
     "number.base": "Page must be a number.",
@@ -69,7 +112,7 @@ const getAllReportsQuerySchema = Joi.object({
   stripUnknown: true,
 });
 
-// Validation for download report files by ID
+/** @type {Joi.ObjectSchema<DownloadReportFilesParams>} */
 const downloadReportFilesSchema = Joi.object({
   id: Joi.string()
     .pattern(/^[0-9a-fA-F]{24}$/)
@@ -83,6 +126,7 @@ const downloadReportFilesSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<UpdateReportStatusBody>} */
 const updateReportStatusSchema = Joi.object({
   id: Joi.string().hex().length(24).required().messages({
     "any.required": "Report ID is required.",
@@ -110,6 +154,7 @@ const updateReportStatusSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<DeleteReportParams>} */
 const deleteReportSchema = Joi.object({
   id: Joi.string().hex().length(24).required().messages({
     "any.required": "Report ID is required.",

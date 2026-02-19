@@ -1,6 +1,21 @@
+// @ts-check
 import Joi from "joi";
 import { ACTION_TYPES } from "../constants/action-types.js";
 
+/**
+ * @typedef {Object} GetAuditLogsQuery
+ * @property {string} [userId] - 24 character hex string (MongoDB ObjectId)
+ * @property {string} [action] - One of the supported ACTION_TYPES
+ * @property {string} [sort] - Sorting string
+ * @property {string} [fields] - Fields selection string
+ */
+
+/**
+ * @typedef {Object} AuditLogIdParam
+ * @property {string} id - 24 character hex string (MongoDB ObjectId)
+ */
+
+/** @type {Joi.ObjectSchema<GetAuditLogsQuery>} */
 const getAuditLogsSchema = Joi.object({
   userId: Joi.string().hex().length(24).optional().messages({
     "string.base": "User ID must be a string.",
@@ -25,6 +40,7 @@ const getAuditLogsSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<AuditLogIdParam>} */
 const getAuditLogByIdSchema = Joi.object({
   id: Joi.string().hex().length(24).required().messages({
     "string.hex": "Audit log ID must be a valid ObjectId",
@@ -36,6 +52,7 @@ const getAuditLogByIdSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<AuditLogIdParam>} */
 const deleteAuditLogSchema = Joi.object({
   id: Joi.string().hex().length(24).required().messages({
     "string.length": "Audit log ID must be a valid ObjectId",

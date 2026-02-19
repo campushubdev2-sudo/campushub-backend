@@ -1,4 +1,19 @@
-function buildFilterFromQuery(query) {
+// @ts-check
+
+/**
+ * @typedef {Object} Query
+ * @property {string} [title] - Event title to filter (partial, case-insensitive)
+ * @property {string} [venue] - Event venue to filter (partial, case-insensitive)
+ * @property {string} [organizedBy] - Organizer name to filter
+ * @property {string|Date} [date] - Event date to filter (exact day)
+ */
+
+/**
+ * Builds a MongoDB filter object from a query object.
+ * @param {Query} query - The query object containing filter parameters
+ * @returns {Object} A MongoDB filter object
+ */
+const buildFilterFromQuery = (query) => {
   const filter = {};
 
   if (query.title) {
@@ -19,6 +34,6 @@ function buildFilterFromQuery(query) {
   }
 
   return filter;
-}
+};
 
 export { buildFilterFromQuery };

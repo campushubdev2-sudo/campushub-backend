@@ -1,3 +1,4 @@
+// @ts-check
 import calendarEntryRepository from "../repositories/calendar-entry.repository.js";
 import { createCalendarEntrySchema } from "../validations/calendar-entry.validation.js";
 import { getCalendarEntryByIdSchema } from "../validations/calendar-entry.validation.js";
@@ -10,6 +11,13 @@ import userRepository from "../repositories/user.repository.js";
 import auditLogRepository from "../repositories/audit-log.repository.js";
 
 class CalendarEntryService {
+  /**
+   * @async
+   * @function createCalendarEntry
+   * @param {string} actorId
+   * @param {{ eventId: import("mongoose").Types.ObjectId, createdBy:import("mongoose").Types.ObjectId }} payload
+   * @returns
+   */
   async createCalendarEntry(actorId, payload) {
     const { error, value } = createCalendarEntrySchema.validate(payload);
 
@@ -53,6 +61,13 @@ class CalendarEntryService {
     };
   }
 
+  /**
+   * @async
+   * @function getCalendarEntries
+   * @param {string} actorId
+   * @param {{ page: number, limit: number, sortBy: "createdAt" | "dateAdded", order: "asc" | "desc", eventId: string | undefined, createdBy: string | undefined }} payload
+   * @returns
+   */
   async getCalendarEntries(actorId, payload) {
     const { error, value } = getCalendarEntriesSchema.validate(payload);
 
@@ -61,7 +76,7 @@ class CalendarEntryService {
       throw new AppError(message, 400);
     }
 
-    const { page, limit, sortBy, order, eventId, createdBy } = value;
+    const { page = 1, limit = 10, sortBy = "createdAt", order, eventId, createdBy } = value;
 
     const query = {};
     if (eventId) {
@@ -100,6 +115,13 @@ class CalendarEntryService {
     };
   }
 
+  /**
+   * @async
+   * @function getCalendarEntryById
+   * @param {string} actorId
+   * @param {string} id
+   * @returns {Promise<Record<string, any>>}
+   */
   async getCalendarEntryById(actorId, id) {
     const { error, value } = getCalendarEntryByIdSchema.validate({ id });
     if (error) {
@@ -123,6 +145,14 @@ class CalendarEntryService {
     return entry;
   }
 
+  /**
+   * @async
+   * @function getCalendarEntryById
+   * @param {string} actorId
+   * @param {string} id
+   * @param {*} payload
+   * @returns {Promise<Record<string, any> | null>}
+   */
   async updateCalendarEntry(actorId, id, payload) {
     const { error, value } = updateCalendarEntrySchema.validate(payload);
 
@@ -148,7 +178,7 @@ class CalendarEntryService {
       throw new AppError("User not found", 404);
     }
 
-    const existingEntryWithEvent = await calendarEntryRepository.findByEventId(eventId);
+    const existingEntryWithEvent = await calendarEntryRepository.findByUserAndEvent(createdBy, eventId);
     if (existingEntryWithEvent && existingEntryWithEvent._id.toString() !== id) {
       throw new AppError("Event already exists in another calendar entry", 409);
     }
@@ -166,6 +196,12 @@ class CalendarEntryService {
     return updatedCalendarEntry;
   }
 
+  /**
+   *
+   * @param {string} actorId
+   * @param {{ id: string }} payload
+   * @returns {Promise<import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, any> | null>}
+   */
   async deleteCalendarEntry(actorId, payload) {
     const { error, value } = deleteCalendarEntrySchema.validate(payload);
     if (error) {
@@ -190,6 +226,9 @@ class CalendarEntryService {
     return deletedEntry;
   }
 
+  /**
+   * @param {string} actorId
+   */
   async getStats(actorId) {
     await auditLogRepository.create({
       userId: actorId,
@@ -197,7 +236,7 @@ class CalendarEntryService {
     });
 
     return {
-      total: await calendarEntryRepository.count(),
+      total: await calendarEntryRepository.count({}),
       byUser: await calendarEntryRepository.countByUser(),
       byEvent: await calendarEntryRepository.countByEvent(),
       overTime: await calendarEntryRepository.countOverTime(),

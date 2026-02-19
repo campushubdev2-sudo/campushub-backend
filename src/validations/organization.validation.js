@@ -1,5 +1,36 @@
+// @ts-check
 import Joi from "joi";
 
+/**
+ * @typedef {Object} CreateOrganizationBody
+ * @property {string} orgName
+ * @property {string} [description]
+ * @property {string} adviserId
+ */
+
+/**
+ * @typedef {Object} GetOrganizationsQuery
+ * @property {number} [page=1]
+ * @property {number} [limit=10]
+ * @property {string} [sort="-createdAt"]
+ * @property {string} [fields]
+ * @property {string} [orgName]
+ * @property {string} [adviserId]
+ */
+
+/**
+ * @typedef {Object} OrganizationIdParam
+ * @property {string} orgId
+ */
+
+/**
+ * @typedef {Object} UpdateOrganizationBody
+ * @property {string} [orgName]
+ * @property {string} [description]
+ * @property {string} [adviserId]
+ */
+
+/** @type {Joi.ObjectSchema<CreateOrganizationBody>} */
 const createOrganizationSchema = Joi.object({
   orgName: Joi.string().max(100).required().trim().messages({
     "string.base": "Organization name must be a string",
@@ -23,6 +54,7 @@ const createOrganizationSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<GetOrganizationsQuery>} */
 const getOrganizationsSchema = Joi.object({
   page: Joi.number().integer().min(1).default(1).messages({
     "number.base": "Page must be a number",
@@ -46,6 +78,7 @@ const getOrganizationsSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<OrganizationIdParam>} */
 const orgIdSchema = Joi.object({
   orgId: Joi.string().hex().length(24).required().messages({
     "string.base": "Organization ID must be a string",
@@ -56,6 +89,7 @@ const orgIdSchema = Joi.object({
   }),
 });
 
+/** @type {Joi.ObjectSchema<UpdateOrganizationBody>} */
 const updateOrganizationSchema = Joi.object({
   orgName: Joi.string().max(100).trim().messages({
     "string.base": "Organization name must be a string",
@@ -74,7 +108,7 @@ const updateOrganizationSchema = Joi.object({
       "string.pattern.base": "Invalid Adviser ID format. It should be a 24-character hexadecimal string",
     }),
 })
-  .min(1) // At least one value must be updated
+  .min(1)
   .messages({
     "object.min": "At least one field must be provided for update",
   })

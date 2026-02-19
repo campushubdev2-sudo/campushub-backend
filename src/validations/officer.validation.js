@@ -1,18 +1,55 @@
 // @ts-check
 import Joi from "joi";
 import { userIdField } from "./fields.js";
-import { BSBA_OFFICER_POSITIONS } from "../constants/officer-positions.js";
-import { BSHM_OFFICER_POSITIONS } from "../constants/officer-positions.js";
-import { JUNIOR_PHILIPPINE_BSA_OFFICER_POSITIONS } from "../constants/officer-positions.js";
-import { SUPREME_STUDENT_COUNCIL_OFFICER_POSITIONS } from "../constants/officer-positions.js";
-import { BSCRIM_OFFICER_POSITIONS } from "../constants/officer-positions.js";
-import { MODERN_YOUNG_EDUCATORS_OFFICER_POSITIONS } from "../constants/officer-positions.js";
-import { COLLEGE_OF_TEACHER_OFFICER_POSITIONS } from "../constants/officer-positions.js";
-import { ELEM_OFFICER_POSITIONS } from "../constants/officer-positions.js";
-import { SSLG_OFFICER_POSITIONS } from "../constants/officer-positions.js";
-import { YWAV_OFFICER_POSITIONS } from "../constants/officer-positions.js";
-import { JPCS_OFFICER_POSITIONS } from "../constants/officer-positions.js";
+import { BSBA_OFFICER_POSITIONS, BSHM_OFFICER_POSITIONS, JUNIOR_PHILIPPINE_BSA_OFFICER_POSITIONS, SUPREME_STUDENT_COUNCIL_OFFICER_POSITIONS, BSCRIM_OFFICER_POSITIONS, MODERN_YOUNG_EDUCATORS_OFFICER_POSITIONS, COLLEGE_OF_TEACHER_OFFICER_POSITIONS, ELEM_OFFICER_POSITIONS, SSLG_OFFICER_POSITIONS, YWAV_OFFICER_POSITIONS, JPCS_OFFICER_POSITIONS } from "../constants/officer-positions.js";
 
+/**
+ * @typedef {Object} CreateOfficerBody
+ * @property {string} userId
+ * @property {string} orgId
+ * @property {string} position
+ * @property {Date} startTerm
+ * @property {Date} endTerm
+ */
+
+/**
+ * @typedef {Object} GetOfficersQuery
+ * @property {string} [orgId]
+ * @property {string} [userId]
+ * @property {string} [position]
+ * @property {number} [page=1]
+ * @property {number} [limit=10]
+ * @property {"createdAt"|"startTerm"|"endTerm"|"position"} [sortBy="createdAt"]
+ * @property {"asc"|"desc"} [order="desc"]
+ */
+
+/**
+ * @typedef {Object} OfficerIdParam
+ * @property {string} id
+ */
+
+/**
+ * @typedef {Object} UpdateOfficerBody
+ * @property {string} [userId]
+ * @property {string} [orgId]
+ * @property {string} [position]
+ * @property {Date} [startTerm]
+ * @property {Date} [endTerm]
+ */
+
+/**
+ * @typedef {Object} OfficersStatsQuery
+ * @property {"month"|"quarter"|"year"} [period="month"]
+ */
+
+/**
+ * @typedef {Object} OfficersNearTermEndQuery
+ * @property {number} [days=30]
+ */
+
+const ALL_OFFICER_POSITIONS = [...BSBA_OFFICER_POSITIONS, ...BSHM_OFFICER_POSITIONS, ...JUNIOR_PHILIPPINE_BSA_OFFICER_POSITIONS, ...SUPREME_STUDENT_COUNCIL_OFFICER_POSITIONS, ...BSCRIM_OFFICER_POSITIONS, ...MODERN_YOUNG_EDUCATORS_OFFICER_POSITIONS, ...COLLEGE_OF_TEACHER_OFFICER_POSITIONS, ...ELEM_OFFICER_POSITIONS, ...SSLG_OFFICER_POSITIONS, ...YWAV_OFFICER_POSITIONS, ...JPCS_OFFICER_POSITIONS];
+
+/** @type {Joi.ObjectSchema<CreateOfficerBody>} */
 const createOfficerSchema = Joi.object({
   userId: userIdField.required().messages({
     "any.required": `"userId" is required`,
@@ -28,7 +65,7 @@ const createOfficerSchema = Joi.object({
   position: Joi.string()
     .max(50)
     .trim()
-    .valid(...BSBA_OFFICER_POSITIONS, ...BSHM_OFFICER_POSITIONS, ...JUNIOR_PHILIPPINE_BSA_OFFICER_POSITIONS, ...SUPREME_STUDENT_COUNCIL_OFFICER_POSITIONS, ...BSCRIM_OFFICER_POSITIONS, ...MODERN_YOUNG_EDUCATORS_OFFICER_POSITIONS, ...COLLEGE_OF_TEACHER_OFFICER_POSITIONS, ...ELEM_OFFICER_POSITIONS, ...SSLG_OFFICER_POSITIONS, ...YWAV_OFFICER_POSITIONS, ...JPCS_OFFICER_POSITIONS)
+    .valid(...ALL_OFFICER_POSITIONS)
     .required()
     .messages({
       "string.base": `"position" must be a string`,
@@ -52,6 +89,7 @@ const createOfficerSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<GetOfficersQuery>} */
 const getOfficersSchema = Joi.object({
   orgId: Joi.string().hex().length(24).optional().messages({
     "string.hex": "The Organization ID must be a valid hexadecimal string.",
@@ -86,6 +124,7 @@ const getOfficersSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<OfficerIdParam>} */
 const getOfficerByIdSchema = Joi.object({
   id: Joi.string().hex().length(24).required().messages({
     "string.base": "ID must be a string",
@@ -98,6 +137,7 @@ const getOfficerByIdSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<OfficerIdParam>} */
 const deleteOfficerSchema = Joi.object({
   id: Joi.string().hex().length(24).required().messages({
     "string.base": "ID must be a string",
@@ -110,6 +150,7 @@ const deleteOfficerSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<UpdateOfficerBody>} */
 const updateOfficerSchema = Joi.object({
   userId: Joi.string().hex().length(24).messages({
     "string.hex": "User ID must be a valid ObjectId",
@@ -123,7 +164,7 @@ const updateOfficerSchema = Joi.object({
   position: Joi.string()
     .max(50)
     .trim()
-    .valid(...BSBA_OFFICER_POSITIONS, ...BSHM_OFFICER_POSITIONS, ...JUNIOR_PHILIPPINE_BSA_OFFICER_POSITIONS, ...SUPREME_STUDENT_COUNCIL_OFFICER_POSITIONS, ...BSCRIM_OFFICER_POSITIONS, ...MODERN_YOUNG_EDUCATORS_OFFICER_POSITIONS, ...COLLEGE_OF_TEACHER_OFFICER_POSITIONS, ...ELEM_OFFICER_POSITIONS, ...SSLG_OFFICER_POSITIONS, ...YWAV_OFFICER_POSITIONS, ...JPCS_OFFICER_POSITIONS)
+    .valid(...ALL_OFFICER_POSITIONS)
     .messages({
       "string.base": "Position must be a string",
       "string.max": "Position cannot exceed 50 characters",
@@ -146,6 +187,7 @@ const updateOfficerSchema = Joi.object({
     stripUnknown: true,
   });
 
+/** @type {Joi.ObjectSchema<OfficersStatsQuery>} */
 const getOfficersStatsByPeriodSchema = Joi.object({
   period: Joi.string().valid("month", "quarter", "year").default("month").messages({
     "any.only": "Period must be one of: month, quarter, year",
@@ -155,6 +197,7 @@ const getOfficersStatsByPeriodSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<OfficersNearTermEndQuery>} */
 const getOfficersNearTermEndSchema = Joi.object({
   days: Joi.number().integer().min(1).max(365).default(30).messages({
     "number.base": "Days must be a number",

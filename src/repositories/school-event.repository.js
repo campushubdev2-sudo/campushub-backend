@@ -14,13 +14,9 @@ class SchoolEventRepository {
     const dateFilter = filter.date ? { ...filter.date } : {};
 
     if (type === "upcoming") {
-      dateFilter.$gte = dateFilter.$gte
-        ? new Date(Math.max(dateFilter.$gte, now))
-        : now;
+      dateFilter.$gte = dateFilter.$gte ? new Date(Math.max(dateFilter.$gte, now)) : now;
     } else if (type === "past") {
-      dateFilter.$lt = dateFilter.$lt
-        ? new Date(Math.min(dateFilter.$lt, now))
-        : now;
+      dateFilter.$lt = dateFilter.$lt ? new Date(Math.min(dateFilter.$lt, now)) : now;
     }
 
     if (Object.keys(dateFilter).length > 0) {
@@ -37,18 +33,12 @@ class SchoolEventRepository {
       sortOption = { date: -1 };
     }
 
-    const [events, total] = await Promise.all([
-      SchoolEvent.find(filter).sort(sortOption).skip(skip).limit(limit).lean(),
-      SchoolEvent.countDocuments(filter),
-    ]);
+    const [events, total] = await Promise.all([SchoolEvent.find(filter).sort(sortOption).skip(skip).limit(limit).lean(), SchoolEvent.countDocuments(filter)]);
 
     const totalPages = Math.ceil(total / limit);
 
-    if (page > totalPages) {
-      throw new AppError(
-        `Invalid page number. Maximum page is ${totalPages}.`,
-        400,
-      );
+    if (total > 0 && page > totalPages) {
+      throw new AppError(`Invalid page number. Maximum page is ${totalPages}.`, 400);
     }
 
     return {
@@ -69,11 +59,7 @@ class SchoolEventRepository {
   }
 
   async updateById(id, updateData) {
-    return await SchoolEvent.findByIdAndUpdate(
-      id,
-      { $set: updateData },
-      { new: true, runValidators: true },
-    ).lean();
+    return await SchoolEvent.findByIdAndUpdate(id, { $set: updateData }, { new: true, runValidators: true }).lean();
   }
 
   async findByDateRange(startDate, endDate) {
@@ -209,10 +195,7 @@ class SchoolEventRepository {
   }
 
   async getRecentEvents(limit = 5) {
-    return await SchoolEvent.find()
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .select("title date venue organizedBy");
+    return await SchoolEvent.find().sort({ createdAt: -1 }).limit(limit).select("title date venue organizedBy");
   }
 }
 

@@ -17,8 +17,8 @@ class ReportService {
     const { error, value } = createReportSchema.validate(payload);
 
     if (error) {
-      const messages = error.details.map((detail) => detail.message);
-      throw new AppError(messages.join(", "), 400);
+      const message = error.details[0].message.replace(/"/g, "");
+      throw new AppError(message, 400);
     }
 
     const { orgId, reportType, filePaths } = value;
@@ -149,6 +149,7 @@ class ReportService {
     const report = await ReportRepository.findById(id, {
       populate: "submittedBy",
     });
+
     if (!report) {
       throw new AppError("Report not found", 404);
     }
@@ -157,14 +158,14 @@ class ReportService {
       return report;
     }
 
-    // pending -> approved
-    const to = report.submittedBy?.phoneNumber;
+    // Send SMS only for pending -> approved
+    if (report.status === "pending" && status === "pending") {
+      const to = report.submittedBy?.phoneNumber;
 
-    if (!to) {
-      throw new AppError("User phone number not found", 400);
-    }
+      if (!to) {
+        throw new AppError("User phone number not found", 400);
+      }
 
-    if (report.status === "pending" && status === "approved") {
       await smsService.sendSMS({ to, message });
     }
 

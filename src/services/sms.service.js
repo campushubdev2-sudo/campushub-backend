@@ -34,14 +34,8 @@ class SmsService {
       const { data } = await this.axiosClient.post("/messages", payload);
       return data;
     } catch (error) {
-      console.error(
-        "Semaphore SMS Error: ",
-        error.response?.data || error.message,
-      );
-      throw new AppError(
-        error.response?.data?.message || "SMS sending failed",
-        error.response?.status || 500,
-      );
+      console.error("Semaphore SMS Error: ", error.response?.data || error.message);
+      throw new AppError(error.response?.data?.message || "SMS sending failed", error.response?.status || 500);
     }
   }
 
@@ -55,10 +49,7 @@ class SmsService {
 
       return response.data;
     } catch (error) {
-      throw new AppError(
-        error.response?.data?.message || "Failed to fetch balance",
-        error.response?.status || 500,
-      );
+      throw new AppError(error.response?.data?.message || "Failed to fetch balance", error.response?.status || 500);
     }
   }
 }

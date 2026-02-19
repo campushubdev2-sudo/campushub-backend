@@ -1,3 +1,4 @@
+// @ts-check
 import auditLogRepository from "../repositories/audit-log.repository.js";
 import { getAuditLogsSchema } from "../validations/audit-log.validation.js";
 import { getAuditLogByIdSchema } from "../validations/audit-log.validation.js";
@@ -5,6 +6,13 @@ import { deleteAuditLogSchema } from "../validations/audit-log.validation.js";
 import { AppError } from "../middlewares/error.middleware.js";
 
 class AuditLogService {
+  /**
+   * @async
+   * @function getAuditLogs
+   * @param {{ userId?: string, action?: string, sort?: string, fields?: string[] }} query
+   * @throws {AppError}
+   * @returns {Promise<Array<Object>>}
+   */
   async getAuditLogs(query) {
     const { error, value } = getAuditLogsSchema.validate(query);
 
@@ -30,6 +38,13 @@ class AuditLogService {
     });
   }
 
+  /**
+   * @async
+   * @function getAuditLogById
+   * @param {{ id: string }} payload
+   * @throws {AppError}
+   * @returns {Promise<Object>}
+   */
   async getAuditLogById(payload) {
     const { error, value } = getAuditLogByIdSchema.validate(payload);
 
@@ -51,6 +66,13 @@ class AuditLogService {
     return auditLog;
   }
 
+  /**
+   * @async
+   * @function deleteAuditLog
+   * @param {{ id: string }} payload
+   * @throws {AppError}
+   * @returns {Promise<Record<string, any> | null>}
+   */
   async deleteAuditLog(payload) {
     const { error, value } = deleteAuditLogSchema.validate(payload);
 
@@ -71,6 +93,11 @@ class AuditLogService {
     return deletedLog;
   }
 
+  /**
+   * @async
+   * @function cleanupAuditLogs
+   * @returns {Promise<{ deletedCount: number }>}
+   */
   async cleanupAuditLogs() {
     const result = await auditLogRepository.deleteAll();
 

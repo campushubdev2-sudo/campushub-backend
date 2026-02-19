@@ -3,7 +3,7 @@ import CalendarEntry from "../models/calendar-entry.model.js";
 
 class CalendarEntryRepository {
   /**
-   * @param {{ eventId: import("mongoose").Types.ObjectId, createdBy: import("mongoose").Types.ObjectId }} payload
+   * @param {{ eventId: string | import("mongoose").Types.ObjectId, createdBy: string | import("mongoose").Types.ObjectId }} payload
    * @returns {Promise<import("mongoose").Document>}
    */
   async create(payload) {
@@ -27,9 +27,7 @@ class CalendarEntryRepository {
    * @returns {Promise<Array<Record<string, any>>>}
    */
   async findByUser(userId) {
-    return await CalendarEntry.find({ createdBy: userId })
-      .populate("eventId")
-      .lean();
+    return await CalendarEntry.find({ createdBy: userId }).populate("eventId").lean();
   }
 
   /**
@@ -50,7 +48,7 @@ class CalendarEntryRepository {
 
   /**
    * @param {string | import("mongoose").Types.ObjectId} id
-   * @param {{ eventId?: import("mongoose").Types.ObjectId, createdBy?: import("mongoose").Types.ObjectId }} updateData
+   * @param {{ eventId?: string | import("mongoose").Types.ObjectId, createdBy?: string | import("mongoose").Types.ObjectId }} updateData
    * @returns {Promise<Record<string, any> | null>}
    */
   async updateById(id, updateData) {

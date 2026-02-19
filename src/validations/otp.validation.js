@@ -1,8 +1,26 @@
-// src/validations/otp.validation.js
-
+// @ts-check
 import Joi from "joi";
 import { emailField, otpField } from "./fields.js";
 
+/**
+ * @typedef {Object} ResetPasswordBody
+ * @property {string} email
+ * @property {string} otp
+ * @property {string} newPassword
+ */
+
+/**
+ * @typedef {Object} SendOtpBody
+ * @property {string} email
+ */
+
+/**
+ * @typedef {Object} VerifyOtpBody
+ * @property {string} email
+ * @property {string} otp
+ */
+
+/** @type {Joi.ObjectSchema<ResetPasswordBody>} */
 const resetPasswordSchema = Joi.object({
   email: emailField.required().messages({
     "any.required": "Email is required",
@@ -25,6 +43,7 @@ const resetPasswordSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<SendOtpBody>} */
 const sendOtpSchema = Joi.object({
   email: emailField.required().messages({
     "any.required": "Email is required",
@@ -34,6 +53,7 @@ const sendOtpSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<VerifyOtpBody>} */
 const verifyOtpSchema = Joi.object({
   email: emailField.required(),
   otp: otpField.required(),

@@ -45,7 +45,7 @@ class SchoolEventService {
       throw new AppError(message, 400);
     }
 
-    const result = SchoolEventRepository.findAll({
+    const result = await SchoolEventRepository.findAll({
       filter: buildFilterFromQuery(value),
       options: value,
     });
@@ -88,8 +88,8 @@ class SchoolEventService {
     const { error, value } = filterEventsSchema.validate(payload);
 
     if (error) {
-      const messages = error.details.map((detail) => detail.message);
-      throw new AppError(messages.join(", "), 400);
+      const message = error.details[0].message.replace(/"/g, "");
+      throw new AppError(message, 400);
     }
 
     const { startDate, endDate } = value;
@@ -125,7 +125,7 @@ class SchoolEventService {
 
     if (error) {
       const message = error.details[0].message.replace(/"/g, "");
-      throw new AppError(message.join(", "), 400);
+      throw new AppError(message, 400);
     }
 
     const { year } = value;
@@ -164,8 +164,8 @@ class SchoolEventService {
     const { error, value } = getRecentEventsSchema.validate(payload);
 
     if (error) {
-      const messages = error.details.map((detail) => detail.message);
-      throw new AppError(messages.join(", "), 400);
+      const message = error.details[0].message.replace(/"/g, "");
+      throw new AppError(message, 400);
     }
 
     const { limit } = value;

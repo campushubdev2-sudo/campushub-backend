@@ -1,8 +1,24 @@
-// src/validations/auth.validation.js
+// @ts-check
 import Joi from "joi";
 
 import { emailField, passwordField, phoneNumberField, roleField, usernameField } from "./fields.js";
 
+/**
+ * @typedef {Object} SignInBody
+ * @property {string} identifier - Username or email
+ * @property {string} password
+ */
+
+/**
+ * @typedef {Object} SignupBody
+ * @property {string} username
+ * @property {string} email
+ * @property {string} [role] - Defaults to "student"
+ * @property {string} phoneNumber
+ * @property {string} password
+ */
+
+/** @type {Joi.ObjectSchema<SignInBody>} */
 const signInSchema = Joi.object({
   identifier: Joi.string().trim().required().messages({
     "string.base": "Identifier must be a string",
@@ -17,6 +33,7 @@ const signInSchema = Joi.object({
   stripUnknown: true,
 });
 
+/** @type {Joi.ObjectSchema<SignupBody>} */
 const signupSchema = Joi.object({
   username: usernameField.required().messages({
     "any.required": "Username is required",

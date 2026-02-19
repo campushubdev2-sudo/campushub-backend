@@ -11,11 +11,26 @@ class OfficerRepository {
     return Officer.findOne({ userId, orgId }).lean();
   }
 
-  async findAll({ filter, sort, skip, limit }) {
-    const query = Officer.find(filter)
-      .populate("userId", "username email role")
-      .populate("orgId", "orgName")
+  /**
+   * Find and delete an officer by ID in a single atomic operation
+   * @param {string} id - The officer ID to delete
+   * @returns {Promise<Object|null>} - The deleted officer with populated fields or null if not found
+   */
+  async findOneAndDelete(id) {
+    return await Officer.findOneAndDelete({ _id: id })
+      .populate({
+        path: "userId",
+        select: "username email role",
+      })
+      .populate({
+        path: "orgId",
+        select: "orgName description",
+      })
       .lean();
+  }
+
+  async findAll({ filter, sort, skip, limit }) {
+    const query = Officer.find(filter).populate("userId", "username email role").populate("orgId", "orgName").lean();
 
     if (sort) {
       query.sort(sort);
@@ -27,19 +42,13 @@ class OfficerRepository {
       query.limit(limit);
     }
 
-    const [items, total] = await Promise.all([
-      query.exec(),
-      Officer.countDocuments(filter),
-    ]);
+    const [items, total] = await Promise.all([query.exec(), Officer.countDocuments(filter)]);
 
     return { items, total };
   }
 
   async findById(id) {
-    return Officer.findById(id)
-      .populate("userId", "username email role")
-      .populate("orgId", "orgName description")
-      .lean();
+    return Officer.findById(id).populate("userId", "username email role").populate("orgId", "orgName description").lean();
   }
 
   async deleteOfficerById(id) {

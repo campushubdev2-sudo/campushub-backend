@@ -1,5 +1,7 @@
+// @ts-check
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 import userRepository from "../repositories/user.repository.js";
 import otpRepository from "../repositories/otp.repository.js";
@@ -9,7 +11,29 @@ import { resetPasswordSchema } from "../validations/otp.validation.js";
 import { AppError } from "../middlewares/error.middleware.js";
 import { JWT_EXPIRES_IN, JWT_ISSUER, JWT_SECRET } from "../config/env.js";
 
+/**
+ * @typedef {Object} JwtPayload
+ * @property {mongoose.Types.ObjectId} userId
+ * @property {string} email
+ * @property {string=} role
+ * @property {string=} username
+ */
+
+/**
+ * @typedef {Object} ResetPasswordPayload
+ * @property {string} email
+ * @property {string} otp
+ * @property {string} newPassword
+ */
+
 class AuthService {
+  /**
+   * @async
+   * @function signIn
+   * @param {{ identifier: string, password: string}} payload
+   * @throws {AppError}
+   * @returns {Promise<{ user: Record<string, any>, token: string }>}
+   */
   async signIn({ identifier, password }) {
     const { error, value } = signInSchema.validate({ identifier, password });
 
@@ -32,7 +56,8 @@ class AuthService {
       throw new AppError("Invalid credentials", 401);
     }
 
-    user.password = undefined;
+    const userObj = user.toObject();
+    const { password: _password, ...safeUser } = userObj;
 
     await auditLogRepository.create({
       userId: user._id,
@@ -40,9 +65,16 @@ class AuthService {
     });
 
     const token = this.generateToken(user);
-    return { user, token };
+    return { user: safeUser, token };
   }
 
+  /**
+   * @async
+   * @function signUp
+   * @param {{ username: string, email: string, password: string, role?: string, phoneNumber?: string }} payload
+   * @throws {AppError}
+   * @returns {Promise<{ id: mongoose.Types.ObjectId, username: string, email: string, role: string, phoneNumber?: string | null, createdAt: Date, updatedAt: Date }>}
+   */
   async signUp(payload) {
     const { error, value } = signupSchema.validate(payload);
 
@@ -87,16 +119,29 @@ class AuthService {
     };
   }
 
+  /**
+   * @async
+   * @function hashPassword
+   * @param {string} plainPassword
+   * @returns {Promise<string>}
+   */
   async hashPassword(plainPassword) {
     const saltRounds = 12;
     return bcrypt.hash(plainPassword, saltRounds);
   }
 
+  /**
+   * @function generateToken
+   * @param {{ _id: mongoose.Types.ObjectId, email: string, role?: string, username?: string }} user
+   * @returns {string}
+   * @throws {AppError}
+   */
   generateToken(user) {
     if (!user || !user._id || !user.email) {
       throw new AppError("Valid user object with id and email is required", 400);
     }
 
+    /** @type {JwtPayload} */
     const payload = {
       userId: user._id,
       email: user.email,
@@ -104,12 +149,23 @@ class AuthService {
       username: user.username,
     };
 
-    return jwt.sign(payload, JWT_SECRET, {
-      expiresIn: JWT_EXPIRES_IN,
+    /** @type {jwt.Secret} */
+    const secret = JWT_SECRET;
+
+    /** @type {jwt.SignOptions} */
+    const options = {
+      expiresIn: /** @type {import("ms").StringValue | number} */ (JWT_EXPIRES_IN),
       issuer: JWT_ISSUER,
-    });
+    };
+
+    return jwt.sign(payload, secret, options);
   }
 
+  /**
+   * @function verifyToken
+   * @param {string} token
+   * @returns {jwt.JwtPayload | string}
+   */
   verifyToken(token) {
     try {
       if (!token) {
@@ -119,16 +175,26 @@ class AuthService {
       const decoded = jwt.verify(token, JWT_SECRET);
       return decoded;
     } catch (error) {
-      if (error.name === "TokenExpiredError") {
+      /** @type {any} */
+      const err = error;
+
+      if (err.name === "TokenExpiredError") {
         throw new AppError("Token expired, Please Login Again", 401);
-      } else if (error.name === "JsonWebTokenError") {
+      } else if (err.name === "JsonWebTokenError") {
         throw new AppError("Invalid token", 401);
       } else {
-        throw new AppError(`Token verification failed: ${error.message}`, 401);
+        throw new AppError(`Token verification failed: ${err.message}`, 401);
       }
     }
   }
 
+  /**
+   * @async
+   * @function resetPassword
+   * @param {ResetPasswordPayload} payload
+   * @returns {Promise<boolean>}
+   * @throws {AppError}
+   */
   async resetPassword(payload) {
     const { error, value } = resetPasswordSchema.validate(payload);
 
