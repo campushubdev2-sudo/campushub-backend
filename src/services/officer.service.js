@@ -63,12 +63,10 @@ class OfficerService {
 
     const { id } = value;
 
-    const officerExists = await officerRepository.checkOfficerExists(id);
-    if (!officerExists) {
+    const officer = await officerRepository.findById(id);
+    if (!officer) {
       throw new AppError("Officer not found", 404);
     }
-
-    const officer = await officerRepository.findById(id);
 
     const deletedOfficer = await officerRepository.deleteOfficerById(id);
 

@@ -75,7 +75,7 @@ const optionalAuthenticate = async (req, _res, next) => {
 
     // Check Authorization header if no cookie token
     if (!token && req.headers.authorization) {
-      if (req.headers.authorization.startsWith("Bearer")) {
+      if (req.headers.authorization.startsWith("Bearer ")) {
         token = req.headers.authorization.split(" ")[1];
       }
     }

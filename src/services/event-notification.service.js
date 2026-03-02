@@ -334,7 +334,7 @@ class EventNotificationService {
     }
 
     // check if event exists
-    const event = await eventNotificationRepository.findById(value.eventId);
+    const event = await schoolEventRepository.findById(value.eventId);
     if (!event) {
       throw new AppError("Event not found", 404);
     }

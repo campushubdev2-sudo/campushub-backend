@@ -3,6 +3,7 @@
 // EXTERNAL DEPENDENCIES
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 // INTERNAL DEPENDENCIES
 import { PORT, NODE_ENV, CLIENT_URL } from "./config/env.js";
@@ -34,6 +35,7 @@ if (isDev) {
 }
 
 app.use(cors({ origin: NODE_ENV === "development" ? "http://localhost:5173" : CLIENT_URL, credentials: true }));
+app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
@@ -90,7 +92,7 @@ const shutdown = () => {
   if (server) {
     server.close(() => process.exit(0));
   } else {
-    process.exit(1);
+    process.exit(0);
   }
 };
 

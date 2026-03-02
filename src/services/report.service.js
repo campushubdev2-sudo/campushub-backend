@@ -81,7 +81,7 @@ class ReportService {
 
   async getReportById(actorId, reportId) {
     if (!reportId || !mongoose.Types.ObjectId.isValid(reportId)) {
-      throw new AppError("  ", 400);
+      throw new AppError("Invalid report ID", 400);
     }
 
     const populate = [
@@ -158,13 +158,13 @@ class ReportService {
     }
 
     // pending -> approved
-    const to = report.submittedBy?.phoneNumber;
-
-    if (!to) {
-      throw new AppError("User phone number not found", 400);
-    }
-
     if (report.status === "pending" && status === "approved") {
+      const to = report.submittedBy?.phoneNumber;
+
+      if (!to) {
+        throw new AppError("User phone number not found", 400);
+      }
+
       await smsService.sendSMS({ to, message });
     }
 

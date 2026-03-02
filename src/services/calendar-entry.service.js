@@ -148,9 +148,9 @@ class CalendarEntryService {
       throw new AppError("User not found", 404);
     }
 
-    const existingEntryWithEvent = await calendarEntryRepository.findByEventId(eventId);
+    const existingEntryWithEvent = await calendarEntryRepository.findByUserAndEvent(createdBy, eventId);
     if (existingEntryWithEvent && existingEntryWithEvent._id.toString() !== id) {
-      throw new AppError("Event already exists in another calendar entry", 409);
+      throw new AppError("Calendar entry for this event already exists for this user", 409);
     }
 
     const updatedCalendarEntry = await calendarEntryRepository.updateById(id, {
